@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 
 interface LoginProps {
-  onLogin: (role: 'admin' | 'user') => void;
+  onLogin: (role: 'admin' | 'user', email: string) => void;
 }
 
 export function Login({ onLogin }: LoginProps) {
@@ -18,9 +18,9 @@ export function Login({ onLogin }: LoginProps) {
       setIsLoading(false);
       // Временная логика: если email содержит "admin" — вход как админ
       if (email.toLowerCase().includes('admin')) {
-        onLogin('admin');
+        onLogin('admin', email);
       } else {
-        onLogin('user');
+        onLogin('user', email);
       }
     }, 1000);
   };
@@ -75,7 +75,8 @@ export function Login({ onLogin }: LoginProps) {
             </form>
             
             <p className="text-center text-gray-400 text-xs mt-4">
-              Демо: введите любой email с "admin" для входа как админ
+              Демо: введите любой email с "admin" для входа как админ<br />
+              Любой другой email — вход как пользователь
             </p>
           </div>
         </div>

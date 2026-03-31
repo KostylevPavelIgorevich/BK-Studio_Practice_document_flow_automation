@@ -1,46 +1,41 @@
 import { useState } from 'react';
 import { Login } from './pages/Login';
 import { AdminPanel } from './pages/AdminPanel';
+import { UserDashboard } from './pages/UserDashboard';
 import './app.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
+  const [userName, setUserName] = useState('');
 
-  const handleLogin = (role: 'admin' | 'user') => {
+  const handleLogin = (role: 'admin' | 'user', email: string) => {
     setIsAuthenticated(true);
     setUserRole(role);
+    // Извлекаем имя пользователя из email (заглушка)
+    const name = email.split('@')[0];
+    setUserName(name.charAt(0).toUpperCase() + name.slice(1));
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
+    setUserName('');
   };
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
   }
 
-  // Пока только админ-панель, потом добавим страницу для пользователя
   if (userRole === 'admin') {
     return <AdminPanel onLogout={handleLogout} />;
   }
 
-  // Заглушка для пользовательской страницы
-  return (
-    <div className="min-h-screen bg-[#E4E9F8] flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold">Страница пользователя</h1>
-        <p className="mt-4">Здесь будет интерфейс для обычного пользователя</p>
-        <button 
-          onClick={handleLogout}
-          className="mt-4 px-4 py-2 bg-[#E36756] text-white rounded-lg"
-        >
-          Выход
-        </button>
-      </div>
-    </div>
-  );
+  if (userRole === 'user') {
+    return <UserDashboard userName={userName} onLogout={handleLogout} />;
+  }
+
+  return null;
 }
 
 export default App;

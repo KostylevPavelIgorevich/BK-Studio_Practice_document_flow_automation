@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
+import { UserRow } from '../components/UserRow';
+import { Documents } from './Documents';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -45,6 +47,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   
   // Состояние для выбора вкладки в редактировании пользователя
   const [editUserTab, setEditUserTab] = useState<'userData' | 'loginPassword'>('userData');
+  
+  // Состояния для страницы документов
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [selectedUserName, setSelectedUserName] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   
   // Данные для форм
   const [newGroupName, setNewGroupName] = useState('');
@@ -204,6 +211,24 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     }
   };
 
+  // Обработчики для перехода к документам
+  const handleSelectUser = (userId: number, fullName: string) => {
+    setSelectedUserId(userId);
+    setSelectedUserName(fullName);
+    setShowDocuments(true);
+  };
+
+  const handleBackToAdmin = () => {
+    setShowDocuments(false);
+    setSelectedUserId(null);
+    setSelectedUserName('');
+  };
+
+  // Если открыта страница документов, показываем её
+  if (showDocuments) {
+    return <Documents userName={selectedUserName} onBack={handleBackToAdmin} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -319,21 +344,14 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             </div>
           </div>
 
+          {/* Список пользователей с использованием компонента UserRow */}
           <div className="bg-white rounded-lg shadow-md max-h-[400px] overflow-y-auto">
             {sortedUsers.map((user) => (
-              <div
+              <UserRow
                 key={user.id}
-                className="grid grid-cols-3 gap-4 px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                onClick={() => {
-                  if (isEditUserModalOpen) {
-                    handleSelectUserToEdit(user);
-                  }
-                }}
-              >
-                <span className="text-gray-700">{user.lastName}</span>
-                <span className="text-gray-700">{user.firstName}</span>
-                <span className="text-gray-700">{user.middleName}</span>
-              </div>
+                user={user}
+                onSelectUser={handleSelectUser}
+              />
             ))}
           </div>
         </div>
