@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { UserRow } from '../components/UserRow';
+
 import { Documents } from './Documents';
+
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -212,22 +214,30 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   // Обработчики для перехода к документам
-  const handleSelectUser = (userId: number, fullName: string) => {
-    setSelectedUserId(userId);
-    setSelectedUserName(fullName);
-    setShowDocuments(true);
-  };
+const handleSelectUser = (userId: number, fullName: string) => {
+  setSelectedUserId(userId);
+  setSelectedUserName(fullName);
+  setShowDocuments(true);
+};
 
-  const handleBackToAdmin = () => {
-    setShowDocuments(false);
-    setSelectedUserId(null);
-    setSelectedUserName('');
-  };
+const handleBackToAdmin = () => {
+  setShowDocuments(false);
+  setSelectedUserId(null);
+  setSelectedUserName('');
+};
 
   // Если открыта страница документов, показываем её
-  if (showDocuments) {
-    return <Documents userName={selectedUserName} onBack={handleBackToAdmin} />;
-  }
+if (showDocuments) {
+  return (
+    <Documents
+      userName={selectedUserName}
+      userId={selectedUserId || undefined}
+      userRole="admin"
+      onBack={handleBackToAdmin}
+      onLogout={onLogout}
+    />
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">

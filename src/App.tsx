@@ -8,11 +8,12 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
   const [userName, setUserName] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
 
-  const handleLogin = (role: 'admin' | 'user', email: string) => {
+  const handleLogin = (role: 'admin' | 'user', email: string, id: number) => {
     setIsAuthenticated(true);
     setUserRole(role);
-    // Извлекаем имя пользователя из email (заглушка)
+    setUserId(id);
     const name = email.split('@')[0];
     setUserName(name.charAt(0).toUpperCase() + name.slice(1));
   };
@@ -21,6 +22,7 @@ function App() {
     setIsAuthenticated(false);
     setUserRole(null);
     setUserName('');
+    setUserId(null);
   };
 
   if (!isAuthenticated) {
@@ -32,7 +34,7 @@ function App() {
   }
 
   if (userRole === 'user') {
-    return <UserDashboard userName={userName} onLogout={handleLogout} />;
+    return <UserDashboard userName={userName} userId={userId || 1} onLogout={handleLogout} />;
   }
 
   return null;

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { ApplicationForm } from './ApplicationForm';
+import { Documents } from './Documents';  // <-- ЭТОТ ИМПОРТ НУЖЕН
 
 interface UserDashboardProps {
   userName: string;
+  userId?: number;
   onLogout: () => void;
 }
 
-export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
+export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps) {
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
 
@@ -18,36 +20,47 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
 
   const handleNavigateToCalculation = () => {
     console.log('Переход на страницу расчета провозной платы');
-    // setCurrentPage('calculation');
   };
 
   const handleNavigateToWaybill = () => {
     console.log('Переход на страницу оформления накладной');
-    // setCurrentPage('waybill');
   };
 
   const handleNavigateToOther = () => {
     console.log('Переход на страницу прочих форм');
-    // setCurrentPage('other');
   };
 
   const handleNavigateToBaggage = () => {
     console.log('Переход на страницу багажных форм');
-    // setCurrentPage('baggage');
   };
 
   const handleNavigateToPrint = () => {
     console.log('Переход на страницу печатных форм');
-    // setCurrentPage('print');
+  };
+
+  const handleNavigateToMyDocuments = () => {
+    setCurrentPage('myDocuments');
   };
 
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
   };
 
-  // Если открыта страница заявки, показываем её
+  // Проверка страниц
   if (currentPage === 'application') {
     return <ApplicationForm onBack={handleBackToDashboard} onLogout={onLogout} />;
+  }
+
+  if (currentPage === 'myDocuments') {
+    return (
+      <Documents
+        userName={userName}
+        userId={userId || 1}
+        userRole="user"
+        onBack={handleBackToDashboard}
+        onLogout={onLogout}
+      />
+    );
   }
 
   // Размеры кнопок для ровного прямоугольника
@@ -127,7 +140,7 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
     {
       id: 'print',
       title: 'Печатные формы',
-      width: 'w-[400px]',
+      width: 'w-[300px]',
       height: 'h-[260px]',
       defaultBg: 'bg-[#2860F0]',
       hoverBg: 'bg-[#C9D9FF]',
@@ -138,10 +151,26 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
       row: 2,
       onClick: handleNavigateToPrint,
     },
+    // Третья строка - Мои документы
+    {
+      id: 'myDocuments',
+      title: 'Мои\nдокументы',
+      width: 'w-[400px]',
+      height: 'h-[260px]',
+      defaultBg: 'bg-[#7C5CFC]',
+      hoverBg: 'bg-[#E4E0FF]',
+      defaultText: 'text-white',
+      hoverText: 'text-[#7C5CFC]',
+      defaultBorder: 'border-transparent',
+      hoverBorder: 'border-2 border-[#7C5CFC]',
+      row: 3,
+      onClick: handleNavigateToMyDocuments,
+    },
   ];
 
   const firstRowButtons = buttons.filter(btn => btn.row === 1);
   const secondRowButtons = buttons.filter(btn => btn.row === 2);
+  const thirdRowButtons = buttons.filter(btn => btn.row === 3);
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
@@ -169,7 +198,7 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
         </div>
       </div>
 
-      {/* Контейнер для кнопок - фиксированная ширина 1100px */}
+      {/* Контейнер для кнопок */}
       <div className="px-6 pb-12">
         <div className="max-w-[1100px] mx-auto">
           {/* Первая строка кнопок */}
@@ -206,8 +235,41 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
           </div>
 
           {/* Вторая строка кнопок */}
-          <div className="flex gap-6 justify-center">
+          <div className="flex gap-6 justify-center mb-6">
             {secondRowButtons.map((button) => {
+              const isHovered = hoveredButton === button.id;
+              return (
+                <button
+                  key={button.id}
+                  onClick={button.onClick}
+                  onMouseEnter={() => setHoveredButton(button.id)}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  className={`
+                    ${button.width}
+                    ${button.height}
+                    ${isHovered ? button.hoverBg : button.defaultBg}
+                    ${isHovered ? button.hoverText : button.defaultText}
+                    ${isHovered ? button.hoverBorder : button.defaultBorder}
+                    rounded-2xl shadow-lg transition-all duration-300
+                    flex items-center justify-center text-center font-bold text-xl
+                    whitespace-pre-line relative z-10
+                    ${isHovered ? 'scale-105 shadow-2xl' : 'hover:scale-105 hover:shadow-2xl'}
+                  `}
+                  style={{
+                    boxShadow: isHovered 
+                      ? '0 0 0 4px white, 0 0 0 8px rgba(0,0,0,0.1)' 
+                      : undefined
+                  }}
+                >
+                  {button.title}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Третья строка кнопок - Мои документы */}
+          <div className="flex gap-6 justify-center">
+            {thirdRowButtons.map((button) => {
               const isHovered = hoveredButton === button.id;
               return (
                 <button
@@ -240,7 +302,7 @@ export function UserDashboard({ userName, onLogout }: UserDashboardProps) {
         </div>
       </div>
 
-      {/* Затемнение фона при наведении на любую кнопку */}
+      {/* Затемнение фона при наведении */}
       {hoveredButton && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-0 transition-all duration-300" />
       )}

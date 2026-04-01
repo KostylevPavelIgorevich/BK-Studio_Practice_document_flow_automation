@@ -1,20 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Navbar } from '../components/Navbar';
 
 interface DocumentsProps {
-  userName: string;
+  userName?: string;
+  userId?: number;
+  userRole: 'admin' | 'user';
   onBack: () => void;
+  onLogout: () => void;
 }
 
-// Заглушка данных для документов
-const mockDocuments = [
-  { id: 1, date: '2024-03-15T10:30:00', type: 'Заявка', printForms: 'Акт, Счет' },
-  { id: 2, date: '2024-03-20T14:15:00', type: 'Счет-фактура', printForms: 'Накладная' },
-  { id: 3, date: '2024-03-10T09:00:00', type: 'Акт выполненных работ', printForms: 'Акт, Счет-фактура' },
-  { id: 4, date: '2024-03-25T16:45:00', type: 'Транспортная накладная', printForms: 'ТТН' },
-  { id: 5, date: '2024-03-18T11:20:00', type: 'Договор аренды', printForms: 'Акт приема-передачи' },
-  { id: 6, date: '2024-03-22T13:00:00', type: 'Счет на оплату', printForms: 'Счет' },
-  { id: 7, date: '2024-03-12T08:30:00', type: 'Акт сверки', printForms: 'Акт сверки' },
-  { id: 8, date: '2024-03-28T09:15:00', type: 'Прочие формы', printForms: 'Различные формы' },
+// Заглушка данных для документов (разные для разных пользователей)
+const allUsersDocuments: Record<number, Array<{ id: number; date: string; type: string; printForms: string }>> = {
+  1: [
+    { id: 1, date: '2024-03-15T10:30:00', type: 'Заявка', printForms: 'Акт, Счет' },
+    { id: 2, date: '2024-03-20T14:15:00', type: 'Счет-фактура', printForms: 'Накладная' },
+    { id: 3, date: '2024-03-10T09:00:00', type: 'Акт выполненных работ', printForms: 'Акт, Счет-фактура' },
+    { id: 4, date: '2024-03-25T16:45:00', type: 'Транспортная накладная', printForms: 'ТТН' },
+    { id: 5, date: '2024-03-18T11:20:00', type: 'Прочие формы', printForms: 'Различные формы' },
+  ],
+  2: [
+    { id: 1, date: '2024-03-16T11:30:00', type: 'Заявка', printForms: 'Акт, Счет' },
+    { id: 2, date: '2024-03-21T15:15:00', type: 'Транспортная накладная', printForms: 'ТТН' },
+    { id: 3, date: '2024-03-22T13:00:00', type: 'Счет на оплату', printForms: 'Счет' },
+  ],
+  3: [
+    { id: 1, date: '2024-03-18T09:45:00', type: 'Прочие формы', printForms: 'Различные формы' },
+    { id: 2, date: '2024-03-22T12:30:00', type: 'Договор аренды', printForms: 'Акт приема-передачи' },
+    { id: 3, date: '2024-03-12T08:30:00', type: 'Акт сверки', printForms: 'Акт сверки' },
+  ],
+};
+
+// Заглушка списка всех пользователей для админа
+const allUsersList = [
+  { id: 1, name: 'Алексеев Алексей Алексеевич' },
+  { id: 2, name: 'Борисова Борислава Борисовна' },
+  { id: 3, name: 'Владимиров Владимир Владимирович' },
 ];
 
 // Данные для заявки
@@ -40,8 +60,8 @@ const applicationData = {
   stationCode: '876543',
 };
 
-// Данные для прочих форм (заглушка)
-const otherFormsData = {
+// Данные для прочих форм
+const otherFormsData: Record<string, any> = {
   'Памятка приемосдатчика': {
     type: 'Памятка приемосдатчика ГУ-45',
     registrationDate: '28-03-2025',
@@ -149,9 +169,8 @@ const otherFormsData = {
   },
 };
 
-export function Documents({ userName, onBack }: DocumentsProps) {
+export function Documents({ userName, userId, userRole, onBack, onLogout }: DocumentsProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [documents, setDocuments] = useState(mockDocuments);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -159,6 +178,19 @@ export function Documents({ userName, onBack }: DocumentsProps) {
   const [selectedDocument, setSelectedDocument] = useState<{ id: number; type: string; date: string } | null>(null);
   const [selectedOtherForm, setSelectedOtherForm] = useState<string | null>(null);
   const [selectedFormData, setSelectedFormData] = useState<any>(null);
+  
+  // Состояния для админского выбора пользователя
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(userId || null);
+  const [documents, setDocuments] = useState<any[]>([]);
+
+  // Загрузка документов в зависимости от роли и выбранного пользователя
+  useEffect(() => {
+    if (userRole === 'admin' && selectedUserId) {
+      setDocuments(allUsersDocuments[selectedUserId] || []);
+    } else if (userRole === 'user' && userId) {
+      setDocuments(allUsersDocuments[userId] || []);
+    }
+  }, [userRole, userId, selectedUserId]);
 
   // Фильтрация документов по поиску
   const filteredDocuments = documents.filter(doc =>
@@ -214,7 +246,7 @@ export function Documents({ userName, onBack }: DocumentsProps) {
   // Выбор прочей формы
   const handleSelectOtherForm = (formName: string) => {
     setSelectedOtherForm(formName);
-    setSelectedFormData(otherFormsData[formName as keyof typeof otherFormsData]);
+    setSelectedFormData(otherFormsData[formName]);
   };
 
   // Открытие выбранной прочей формы
@@ -225,89 +257,135 @@ export function Documents({ userName, onBack }: DocumentsProps) {
     }
   };
 
+  // Получение имени пользователя для отображения
+  const getDisplayUserName = () => {
+    if (userRole === 'admin' && selectedUserId) {
+      const user = allUsersList.find(u => u.id === selectedUserId);
+      return user?.name || 'Выбранный пользователь';
+    }
+    return userName || 'Пользователь';
+  };
+
   return (
-    <div className="min-h-screen bg-[#E4E9F8] p-6">
-      <div className="w-full">
-        {/* Информация о пользователе */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Документы пользователя</h1>
-          <p className="text-gray-600 mt-1">
-            Пользователь: <span className="font-semibold text-[#2860F0]">{userName}</span>
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#E4E9F8]">
+      <Navbar />
+      
+      {/* Кнопка назад */}
+      <div className="absolute top-4 left-6 z-10">
+        <button
+          onClick={onBack}
+          className="px-4 py-2 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors shadow-md flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Назад
+        </button>
+      </div>
 
-        {/* Поиск и кнопка назад в одной строке */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Поиск документов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2860F0] focus:ring-1 focus:ring-[#2860F0]"
-            />
+      {/* Кнопка выхода */}
+      <div className="absolute top-4 right-6 z-10">
+        <button
+          onClick={onLogout}
+          className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors shadow-md"
+        >
+          Выход
+        </button>
+      </div>
+
+      {/* Основной контент */}
+      <div className="pt-20 px-6 pb-6">
+        <div className="w-full">
+          {/* Информация о пользователе */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Документы пользователя</h1>
+            <p className="text-gray-600 mt-1">
+              Пользователь: <span className="font-semibold text-[#2860F0]">{getDisplayUserName()}</span>
+            </p>
           </div>
-          <button
-            onClick={onBack}
-            className="px-6 py-2 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors shadow-md flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Назад
-          </button>
-        </div>
 
-        {/* Таблица с документами - на всю ширину */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Шапка таблицы */}
-          <div className="grid grid-cols-3 gap-4 px-6 py-3 border-b" style={{ backgroundColor: '#E4E0FF' }}>
-            <div className="flex items-center justify-between text-[#7C5CFC] font-semibold">
-              <span>Время прохождения</span>
-              <button
-                onClick={toggleSortOrder}
-                className="ml-2 hover:opacity-70 transition-opacity"
-                title={sortOrder === 'desc' ? 'Сортировка: от новых к старым' : 'Сортировка: от старых к новым'}
+          {/* Для админа - выбор пользователя */}
+          {userRole === 'admin' && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Выберите пользователя:</label>
+              <select
+                value={selectedUserId || ''}
+                onChange={(e) => setSelectedUserId(Number(e.target.value))}
+                className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-[#2860F0] focus:ring-1 focus:ring-[#2860F0]"
               >
-                <svg className="w-4 h-4 text-[#7C5CFC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {sortOrder === 'desc' ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  )}
-                </svg>
-              </button>
+                <option value="">Выберите пользователя</option>
+                {allUsersList.map(user => (
+                  <option key={user.id} value={user.id}>{user.name}</option>
+                ))}
+              </select>
             </div>
-            <div className="text-[#7C5CFC] font-semibold">Тип документа</div>
-            <div className="text-[#7C5CFC] font-semibold">Печатные формы</div>
+          )}
+
+          {/* Поиск */}
+          <div className="flex gap-4 mb-6">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Поиск документов..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2860F0] focus:ring-1 focus:ring-[#2860F0]"
+              />
+            </div>
           </div>
 
-          {/* Тело таблицы */}
-          <div className="divide-y divide-gray-100">
-            {sortedDocuments.length > 0 ? (
-              sortedDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="grid grid-cols-3 gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-                  style={{ backgroundColor: '#EFECF9' }}
-                  onClick={() => handleOpenDocument(doc)}
+          {/* Таблица с документами */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            {/* Шапка таблицы */}
+            <div className="grid grid-cols-3 gap-4 px-6 py-3 border-b" style={{ backgroundColor: '#E4E0FF' }}>
+              <div className="flex items-center justify-between text-[#7C5CFC] font-semibold">
+                <span>Время прохождения</span>
+                <button
+                  onClick={toggleSortOrder}
+                  className="ml-2 hover:opacity-70 transition-opacity"
                 >
-                  <div className="text-gray-700">{formatDate(doc.date)}</div>
-                  <div className="text-gray-700 font-medium text-[#2860F0]">{doc.type}</div>
-                  <div className="text-gray-700">{doc.printForms}</div>
-                </div>
-              ))
-            ) : (
-              <div className="px-6 py-8 text-center text-gray-500" style={{ backgroundColor: '#EFECF9' }}>
-                Документы не найдены
+                  <svg className="w-4 h-4 text-[#7C5CFC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {sortOrder === 'desc' ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    )}
+                  </svg>
+                </button>
               </div>
-            )}
-          </div>
-        </div>
+              <div className="text-[#7C5CFC] font-semibold">Тип документа</div>
+              <div className="text-[#7C5CFC] font-semibold">Печатные формы</div>
+            </div>
 
-        {/* Информация о количестве документов */}
-        <div className="mt-4 text-sm text-gray-500">
-          Найдено документов: {sortedDocuments.length}
+            {/* Тело таблицы */}
+            <div className="divide-y divide-gray-100">
+              {selectedUserId && sortedDocuments.length > 0 ? (
+                sortedDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="grid grid-cols-3 gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                    style={{ backgroundColor: '#EFECF9' }}
+                    onClick={() => handleOpenDocument(doc)}
+                  >
+                    <div className="text-gray-700">{formatDate(doc.date)}</div>
+                    <div className="text-gray-700 font-medium text-[#2860F0]">{doc.type}</div>
+                    <div className="text-gray-700">{doc.printForms}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-6 py-8 text-center text-gray-500" style={{ backgroundColor: '#EFECF9' }}>
+                  {!selectedUserId ? 'Выберите пользователя для просмотра документов' : 'Документы не найдены'}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Информация о количестве документов */}
+          {selectedUserId && (
+            <div className="mt-4 text-sm text-gray-500">
+              Найдено документов: {sortedDocuments.length}
+            </div>
+          )}
         </div>
       </div>
 
@@ -365,18 +443,15 @@ export function Documents({ userName, onBack }: DocumentsProps) {
         </div>
       )}
 
-      {/* Модальное окно с данными документа (для заявки и прочих форм) */}
+      {/* Модальное окно с данными документа */}
       {isApplicationModalOpen && selectedDocument && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto py-8">
           <div className="w-[800px] max-h-[90vh] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl flex flex-col">
-            {/* Шапка */}
             <div className="bg-[#C9D9FF] px-6 py-3">
               <h3 className="text-lg font-semibold text-gray-800">
                 {formatDate(selectedDocument.date)} / {selectedDocument.type}
               </h3>
             </div>
-            
-            {/* Тело с данными */}
             <div className="p-6 overflow-y-auto flex-1">
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="space-y-3">
@@ -524,8 +599,6 @@ export function Documents({ userName, onBack }: DocumentsProps) {
                 </div>
               </div>
             </div>
-            
-            {/* Футер с кнопками */}
             <div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
               <button
                 onClick={handleOpenPrintForm}
@@ -551,15 +624,12 @@ export function Documents({ userName, onBack }: DocumentsProps) {
       {isPrintModalOpen && selectedDocument && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto py-8">
           <div className="w-[800px] max-h-[90vh] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl flex flex-col">
-            {/* Шапка */}
             <div className="bg-[#C9D9FF] px-6 py-3">
               <h3 className="text-lg font-semibold text-gray-800">
                 Печатная форма: {formatDate(selectedDocument.date)} / {selectedDocument.type}
                 {selectedOtherForm && ` - ${selectedOtherForm}`}
               </h3>
             </div>
-            
-            {/* Тело с данными */}
             <div className="p-6 overflow-y-auto flex-1">
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="space-y-3">
@@ -707,21 +777,15 @@ export function Documents({ userName, onBack }: DocumentsProps) {
                 </div>
               </div>
             </div>
-            
-            {/* Футер с кнопками */}
             <div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
               <button
-                onClick={() => {
-                  window.print();
-                }}
+                onClick={() => window.print()}
                 className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
               >
                 Печать
               </button>
               <button
-                onClick={() => {
-                  setIsPrintModalOpen(false);
-                }}
+                onClick={() => setIsPrintModalOpen(false)}
                 className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors border border-white"
               >
                 Закрыть

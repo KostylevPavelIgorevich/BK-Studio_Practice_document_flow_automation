@@ -2,8 +2,17 @@ import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 
 interface LoginProps {
-  onLogin: (role: 'admin' | 'user', email: string) => void;
+  onLogin: (role: 'admin' | 'user', email: string, userId: number) => void;
 }
+
+// Временная заглушка для ID пользователей
+const mockUsers: Record<string, { role: 'admin' | 'user'; id: number }> = {
+  'admin@test.com': { role: 'admin', id: 0 },
+  'user@test.com': { role: 'user', id: 1 },
+  'alekseev@test.com': { role: 'user', id: 1 },
+  'borisova@test.com': { role: 'user', id: 2 },
+  'vladimirov@test.com': { role: 'user', id: 3 },
+};
 
 export function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
@@ -16,11 +25,19 @@ export function Login({ onLogin }: LoginProps) {
     
     setTimeout(() => {
       setIsLoading(false);
-      // Временная логика: если email содержит "admin" — вход как админ
-      if (email.toLowerCase().includes('admin')) {
-        onLogin('admin', email);
+      
+      // Проверяем, есть ли такой email в заглушке
+      const user = mockUsers[email];
+      
+      if (user) {
+        // Если email есть в заглушке, используем его роль и ID
+        onLogin(user.role, email, user.id);
+      } else if (email.toLowerCase().includes('admin')) {
+        // Если email содержит "admin" но нет в заглушке
+        onLogin('admin', email, 0);
       } else {
-        onLogin('user', email);
+        // Для всех остальных email — пользователь с ID = 1
+        onLogin('user', email, 1);
       }
     }, 1000);
   };
@@ -75,8 +92,12 @@ export function Login({ onLogin }: LoginProps) {
             </form>
             
             <p className="text-center text-gray-400 text-xs mt-4">
-              Демо: введите любой email с "admin" для входа как админ<br />
-              Любой другой email — вход как пользователь
+              Демо-пользователи:<br />
+              admin@test.com — Администратор<br />
+              alekseev@test.com — Алексеев (ID 1)<br />
+              borisova@test.com — Борисова (ID 2)<br />
+              vladimirov@test.com — Владимиров (ID 3)<br />
+              Любой другой email — пользователь (ID 1)
             </p>
           </div>
         </div>
