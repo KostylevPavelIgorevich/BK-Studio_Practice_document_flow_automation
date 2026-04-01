@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '../components/Navbar';
 
 interface ApplicationFormProps {
@@ -8,75 +8,266 @@ interface ApplicationFormProps {
 
 export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
   // Состояния для полей
-  const [documentType, setDocumentType] = useState('');
-  const [registrationDate, setRegistrationDate] = useState('');
-  const [carrierName, setCarrierName] = useState('');
-  const [carrierOkpo, setCarrierOkpo] = useState('');
-  const [validityFrom, setValidityFrom] = useState('');
-  const [validityTo, setValidityTo] = useState('');
-  const [sendSign, setSendSign] = useState('');
-  const [countryDeparture, setCountryDeparture] = useState('');
-  const [stationDeparture, setStationDeparture] = useState('');
-  const [stationFullName, setStationFullName] = useState('');
-  const [stationCode, setStationCode] = useState('');
+  const [documentType, setDocumentType] = useState('Заявка на перевозку грузов ГУ-12');
+  const [registrationDate, setRegistrationDate] = useState('2025-08-26');
+  const [carrierName, setCarrierName] = useState('ООО ТрансЛогистик');
+  const [stationDeparture, setStationDeparture] = useState('Новосибирск-Главный');
+  const [showNotification, setShowNotification] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
   
-  // Новые поля
-  const [messageTypeName, setMessageTypeName] = useState('');
-  const [cargoGroupCode, setCargoGroupCode] = useState('');
-  const [cargoGroupName, setCargoGroupName] = useState('');
-  const [cargoExactName, setCargoExactName] = useState('');
-  const [cargoCode, setCargoCode] = useState('');
-  const [shipperName, setShipperName] = useState('');
-  const [shipperAddress, setShipperAddress] = useState('');
-  const [shipperOkpo, setShipperOkpo] = useState('');
+  const printRef = useRef<HTMLDivElement>(null);
 
-  // Состояния для галочек
-  const [carrierChecked, setCarrierChecked] = useState(false);
-  const [okpoChecked, setOkpoChecked] = useState(false);
-  const [stationChecked, setStationChecked] = useState(false);
-  const [stationFullChecked, setStationFullChecked] = useState(false);
-  const [codeChecked, setCodeChecked] = useState(false);
-  
-  // Новые галочки
-  const [messageTypeChecked, setMessageTypeChecked] = useState(false);
-  const [cargoGroupCodeChecked, setCargoGroupCodeChecked] = useState(false);
-  const [cargoGroupNameChecked, setCargoGroupNameChecked] = useState(false);
-  const [cargoExactNameChecked, setCargoExactNameChecked] = useState(false);
-  const [cargoCodeChecked, setCargoCodeChecked] = useState(false);
-  const [shipperNameChecked, setShipperNameChecked] = useState(false);
-  const [shipperAddressChecked, setShipperAddressChecked] = useState(false);
-  const [shipperOkpoChecked, setShipperOkpoChecked] = useState(false);
+  // Загрузка сохранённых данных
+  useEffect(() => {
+    const saved = localStorage.getItem('applicationForm');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setDocumentType(data.documentType || 'Заявка на перевозку грузов ГУ-12');
+      setRegistrationDate(data.registrationDate || '2025-08-26');
+      setCarrierName(data.carrierName || 'ООО ТрансЛогистик');
+      setStationDeparture(data.stationDeparture || 'Новосибирск-Главный');
+    }
+  }, []);
 
-  // Состояния для модального окна печати
-  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
-  const [isPrintFormModalOpen, setIsPrintFormModalOpen] = useState(false);
-  const [selectedForms, setSelectedForms] = useState({
-    gu12: false,
-    gu114: false,
-  });
-
-  const sendSignOptions = ['ВО', 'КО', 'МО'];
-  const countryOptions = ['Россия', 'Казахстан', 'Беларусь', 'Китай', 'Другие'];
-
-  const handleCheckClick = (setter: React.Dispatch<React.SetStateAction<boolean>>, currentValue: boolean) => {
-    setter(!currentValue);
+  // Сохранение данных
+  const handleSave = () => {
+    const formData = {
+      documentType,
+      registrationDate,
+      carrierName,
+      stationDeparture,
+    };
+    localStorage.setItem('applicationForm', JSON.stringify(formData));
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+    console.log('Сохранено:', formData);
   };
 
-  const handlePrintClick = () => {
-    setIsPrintModalOpen(true);
+  // Открыть модальное окно печати
+  const handleOpenPrintModal = () => {
+    setShowPrintModal(true);
   };
 
-  const handleAcceptPrint = () => {
-    setIsPrintModalOpen(false);
-    setIsPrintFormModalOpen(true);
+  // Закрыть модальное окно печати
+  const handleClosePrintModal = () => {
+    setShowPrintModal(false);
   };
 
-  const handleFormCheck = (form: 'gu12' | 'gu114') => {
-    setSelectedForms(prev => ({
-      ...prev,
-      [form]: !prev[form]
-    }));
+  // Выполнить печать
+  const handlePrint = () => {
+    if (printRef.current) {
+      const printContent = printRef.current.innerHTML;
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Заявка на перевозку грузов</title>
+              <meta charset="UTF-8">
+              <style>
+                * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                }
+                body {
+                  font-family: 'Times New Roman', 'Georgia', serif;
+                  background: white;
+                  padding: 40px;
+                  margin: 0;
+                }
+                .document {
+                  max-width: 800px;
+                  margin: 0 auto;
+                  background: white;
+                  border: 1px solid #e0e0e0;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                }
+                .header {
+                  text-align: center;
+                  padding: 30px 30px 20px;
+                  border-bottom: 2px solid #2860F0;
+                }
+                .header h1 {
+                  font-size: 24px;
+                  font-weight: bold;
+                  color: #1a2c3e;
+                  margin-bottom: 8px;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                }
+                .header .form-number {
+                  font-size: 14px;
+                  color: #666;
+                  margin-top: 5px;
+                }
+                .header .date {
+                  font-size: 12px;
+                  color: #999;
+                  margin-top: 10px;
+                }
+                .content {
+                  padding: 30px;
+                }
+                .info-row {
+                  display: flex;
+                  margin-bottom: 16px;
+                  padding-bottom: 12px;
+                  border-bottom: 1px dashed #e0e0e0;
+                }
+                .info-label {
+                  width: 180px;
+                  font-weight: 600;
+                  color: #2c3e50;
+                  font-size: 14px;
+                }
+                .info-value {
+                  flex: 1;
+                  color: #1a2c3e;
+                  font-size: 14px;
+                  line-height: 1.5;
+                }
+                .footer {
+                  margin-top: 30px;
+                  padding-top: 20px;
+                  border-top: 1px solid #e0e0e0;
+                  text-align: center;
+                  font-size: 11px;
+                  color: #999;
+                }
+                .stamp {
+                  margin-top: 30px;
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 0 20px;
+                }
+                .stamp div {
+                  text-align: center;
+                  font-size: 12px;
+                  color: #666;
+                }
+                .signature-line {
+                  width: 200px;
+                  border-top: 1px solid #000;
+                  margin-top: 5px;
+                }
+                @media print {
+                  body {
+                    padding: 0;
+                  }
+                  .document {
+                    box-shadow: none;
+                    border: none;
+                  }
+                  .no-print {
+                    display: none;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="document">
+                <div class="header">
+                  <h1>ЗАЯВКА НА ПЕРЕВОЗКУ ГРУЗОВ</h1>
+                  <div class="form-number">Форма ГУ-12</div>
+                  <div class="date">Дата формирования: ${new Date().toLocaleDateString('ru-RU')}</div>
+                </div>
+                <div class="content">
+                  ${printContent}
+                  <div class="stamp">
+                    <div>
+                      <div>М.П.</div>
+                      <div class="signature-line"></div>
+                      <div>Подпись отправителя</div>
+                    </div>
+                    <div>
+                      <div>М.П.</div>
+                      <div class="signature-line"></div>
+                      <div>Подпись перевозчика</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="footer">
+                  Настоящий документ является официальным и имеет юридическую силу<br>
+                  Система электронного документооборота "Documentob Diplom"
+                </div>
+              </div>
+              <script>
+                window.onload = () => {
+                  window.print();
+                  window.onafterprint = () => window.close();
+                };
+              <\/script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    }
+    setShowPrintModal(false);
   };
+
+  // Форматирование даты для отображения
+  const formatDateForDisplay = (dateStr: string) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+    return dateStr;
+  };
+
+  // Компонент предварительного просмотра (красивое оформление)
+  const DocumentPreview = () => (
+    <div className="bg-white rounded-lg shadow-lg p-6 font-serif">
+      <div className="text-center border-b-2 border-[#2860F0] pb-4 mb-4">
+        <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">ЗАЯВКА НА ПЕРЕВОЗКУ ГРУЗОВ</h2>
+        <p className="text-gray-500 text-sm mt-1">Форма ГУ-12</p>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex py-2 border-b border-dashed border-gray-200">
+          <div className="w-40 font-semibold text-gray-700">Тип документа:</div>
+          <div className="flex-1 text-gray-800">{documentType || '—'}</div>
+        </div>
+        
+        <div className="flex py-2 border-b border-dashed border-gray-200">
+          <div className="w-40 font-semibold text-gray-700">Дата регистрации:</div>
+          <div className="flex-1 text-gray-800">{formatDateForDisplay(registrationDate) || '—'}</div>
+        </div>
+        
+        <div className="flex py-2 border-b border-dashed border-gray-200">
+          <div className="w-40 font-semibold text-gray-700">Перевозчик:</div>
+          <div className="flex-1 text-gray-800">{carrierName || '—'}</div>
+        </div>
+        
+        <div className="flex py-2 border-b border-dashed border-gray-200">
+          <div className="w-40 font-semibold text-gray-700">Станция отправления:</div>
+          <div className="flex-1 text-gray-800">{stationDeparture || '—'}</div>
+        </div>
+      </div>
+      
+      <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+        <div className="flex justify-between px-4">
+          <div className="text-center">
+            <div className="text-xs text-gray-500">М.П.</div>
+            <div className="w-32 h-px bg-gray-400 mt-1"></div>
+            <div className="text-xs text-gray-500 mt-1">Подпись отправителя</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">М.П.</div>
+            <div className="w-32 h-px bg-gray-400 mt-1"></div>
+            <div className="text-xs text-gray-500 mt-1">Подпись перевозчика</div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4 text-xs text-gray-400 text-center">
+        Документ сформирован автоматически
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
@@ -104,510 +295,120 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
         </button>
       </div>
 
-      {/* Основной контент */}
-      <div className="pt-20 pb-12">
-        <div className="w-full px-0">
-          {/* Заголовок */}
-          <div className="bg-[#BBB1FA] py-4 px-6 mb-0">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Оформление заявки на перевозку грузов
-            </h1>
-          </div>
+      {/* Уведомление о сохранении */}
+      {showNotification && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-[#3ABC96] text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
+          ✅ Данные сохранены!
+        </div>
+      )}
 
-          {/* Реквизиты документа */}
-          <div className="bg-[#BBB1FA] py-4 px-6">
-            <h2 className="text-xl font-semibold text-gray-800">Реквизиты документа</h2>
+      {/* Модальное окно печати */}
+      {showPrintModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="w-[600px] max-h-[80vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+            <div className="bg-[#C9D9FF] px-6 py-3 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Предварительный просмотр печати</h3>
+              <p className="text-xs text-gray-600 mt-1">Проверьте документ перед печатью</p>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[50vh]">
+              <DocumentPreview />
+            </div>
+            <div className="bg-gray-50 px-6 py-4 flex gap-3 border-t border-gray-200">
+              <button
+                onClick={handlePrint}
+                className="flex-1 py-2 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors"
+              >
+                🖨️ Печать
+              </button>
+              <button
+                onClick={handleClosePrintModal}
+                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
+              >
+                ✖️ Отмена
+              </button>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Тип документа */}
-          <div className="bg-white py-3 px-6 flex items-center">
-            <label className="w-48 text-gray-700 font-medium">Тип документа</label>
-            <input
-              type="text"
-              value={documentType}
-              onChange={(e) => setDocumentType(e.target.value)}
-              placeholder="Введите тип документа"
-              className="flex-1 max-w-md px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-[10px] text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-          </div>
-
-          {/* Дата регистрации */}
-          <div className="bg-white py-3 px-6 flex items-center">
-            <label className="w-48 text-gray-700 font-medium">Дата регистрации</label>
-            <div className="bg-[#C9D9FF] p-2 rounded-lg">
+      {/* Основной контент - две колонки */}
+      <div className="pt-20 px-6 pb-6 h-screen flex gap-6 overflow-hidden">
+        {/* Левая колонка - поля для ввода (50%) */}
+        <div className="w-1/2 bg-white rounded-lg shadow-lg overflow-y-auto p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+            Оформление заявки на перевозку грузов
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Тип документа</label>
+              <input
+                type="text"
+                value={documentType}
+                onChange={(e) => setDocumentType(e.target.value)}
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Дата регистрации</label>
               <input
                 type="date"
                 value={registrationDate}
                 onChange={(e) => setRegistrationDate(e.target.value)}
-                className="w-[170px] h-10 px-3 bg-[#E4E9F8] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Наименование перевозчика</label>
+              <input
+                type="text"
+                value={carrierName}
+                onChange={(e) => setCarrierName(e.target.value)}
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Станция отправления</label>
+              <input
+                type="text"
+                value={stationDeparture}
+                onChange={(e) => setStationDeparture(e.target.value)}
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
               />
             </div>
           </div>
-
-          {/* Сведения о перевозке */}
-          <div className="bg-[#BBB1FA] py-4 px-6 mt-2">
-            <h2 className="text-xl font-semibold text-gray-800">Сведения о перевозке</h2>
+        </div>
+        
+        {/* Правая колонка - предварительный просмотр (50%) */}
+        <div className="w-1/2 flex flex-col">
+          <div className="bg-[#C9D9FF] py-2 px-4 rounded-t-lg">
+            <h3 className="font-semibold text-gray-800">Предварительный просмотр документа</h3>
+            <p className="text-xs text-gray-600">Данные обновляются автоматически при вводе</p>
           </div>
-
-          {/* Наименование перевозчика */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Наименование перевозчика</label>
-            <input
-              type="text"
-              value={carrierName}
-              onChange={(e) => setCarrierName(e.target.value)}
-              placeholder="Введите наименование"
-              className="flex-1 max-w-[756px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
+          <div ref={printRef} className="flex-1 bg-[#EFECF9] rounded-b-lg p-4 overflow-y-auto">
+            <DocumentPreview />
+          </div>
+          
+          {/* Кнопки действий */}
+          <div className="flex gap-4 mt-4">
             <button
-              onClick={() => handleCheckClick(setCarrierChecked, carrierChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                carrierChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
+              onClick={handleSave}
+              className="flex-1 py-3 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors"
             >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Код ОКПО перевозчика */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Код ОКПО</label>
-            <input
-              type="text"
-              value={carrierOkpo}
-              onChange={(e) => setCarrierOkpo(e.target.value)}
-              placeholder="Введите код ОКПО"
-              className="flex-1 max-w-[756px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setOkpoChecked, okpoChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                okpoChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Срок действия заявки */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Срок действия заявки</label>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">С</span>
-                <input
-                  type="date"
-                  value={validityFrom}
-                  onChange={(e) => setValidityFrom(e.target.value)}
-                  className="w-[204px] h-10 px-3 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">До</span>
-                <input
-                  type="date"
-                  value={validityTo}
-                  onChange={(e) => setValidityTo(e.target.value)}
-                  className="w-[204px] h-10 px-3 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Признак отправки */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Признак отправки</label>
-            <select
-              value={sendSign}
-              onChange={(e) => setSendSign(e.target.value)}
-              className="w-[170px] h-10 px-3 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            >
-              <option value="">Выберите</option>
-              {sendSignOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Страна отправления */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Страна отправления</label>
-            <select
-              value={countryDeparture}
-              onChange={(e) => setCountryDeparture(e.target.value)}
-              className="w-[501px] h-10 px-3 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            >
-              <option value="">Выберите страну</option>
-              {countryOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Станция отправления */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Станция отправления</label>
-            <input
-              type="text"
-              value={stationDeparture}
-              onChange={(e) => setStationDeparture(e.target.value)}
-              placeholder="Введите станцию отправления"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setStationChecked, stationChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                stationChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Полное наименование станции */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Полное наименование станции и инфраструктуры отправления</label>
-            <input
-              type="text"
-              value={stationFullName}
-              onChange={(e) => setStationFullName(e.target.value)}
-              placeholder="Введите полное наименование"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setStationFullChecked, stationFullChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                stationFullChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Код */}
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Код</label>
-            <input
-              type="text"
-              value={stationCode}
-              onChange={(e) => setStationCode(e.target.value)}
-              placeholder="Введите код"
-              className="w-[416px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setCodeChecked, codeChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                codeChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Вид сообщения */}
-          <div className="bg-[#BBB1FA] py-4 px-6 mt-2">
-            <h2 className="text-xl font-semibold text-gray-800">Вид сообщения</h2>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Наименование вида сообщений</label>
-            <input
-              type="text"
-              value={messageTypeName}
-              onChange={(e) => setMessageTypeName(e.target.value)}
-              placeholder="Введите наименование вида сообщений"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setMessageTypeChecked, messageTypeChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                messageTypeChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Номенклатурная группа груза */}
-          <div className="bg-[#BBB1FA] py-4 px-6 mt-2">
-            <h2 className="text-xl font-semibold text-gray-800">Номенклатурная группа груза</h2>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Код Номенклатурной группы груза</label>
-            <input
-              type="text"
-              value={cargoGroupCode}
-              onChange={(e) => setCargoGroupCode(e.target.value)}
-              placeholder="Введите код"
-              className="w-[416px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setCargoGroupCodeChecked, cargoGroupCodeChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                cargoGroupCodeChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Наименование номенклатурной группы</label>
-            <input
-              type="text"
-              value={cargoGroupName}
-              onChange={(e) => setCargoGroupName(e.target.value)}
-              placeholder="Введите наименование"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setCargoGroupNameChecked, cargoGroupNameChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                cargoGroupNameChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Точное наименование груза</label>
-            <input
-              type="text"
-              value={cargoExactName}
-              onChange={(e) => setCargoExactName(e.target.value)}
-              placeholder="Введите точное наименование груза"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setCargoExactNameChecked, cargoExactNameChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                cargoExactNameChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Код груза</label>
-            <input
-              type="text"
-              value={cargoCode}
-              onChange={(e) => setCargoCode(e.target.value)}
-              placeholder="Введите код груза"
-              className="w-[416px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setCargoCodeChecked, cargoCodeChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                cargoCodeChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Грузоотправитель */}
-          <div className="bg-[#BBB1FA] py-4 px-6 mt-2">
-            <h2 className="text-xl font-semibold text-gray-800">Грузоотправитель</h2>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">
-              Наименование владельца<br />
-              <span className="text-xs text-gray-500">(железнодорожного пути необщего пользования)</span>
-            </label>
-            <input
-              type="text"
-              value={shipperName}
-              onChange={(e) => setShipperName(e.target.value)}
-              placeholder="Введите наименование"
-              className="flex-1 max-w-[1370px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setShipperNameChecked, shipperNameChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                shipperNameChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Почтовый адрес</label>
-            <input
-              type="text"
-              value={shipperAddress}
-              onChange={(e) => setShipperAddress(e.target.value)}
-              placeholder="Введите почтовый адрес"
-              className="w-[464px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setShipperAddressChecked, shipperAddressChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                shipperAddressChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-[#F8F7FF] py-3 px-6 flex items-center">
-            <label className="w-64 text-gray-700 font-medium">Код ОКПО</label>
-            <input
-              type="text"
-              value={shipperOkpo}
-              onChange={(e) => setShipperOkpo(e.target.value)}
-              placeholder="Введите код ОКПО"
-              className="w-[416px] h-10 px-4 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF] transition-all"
-            />
-            <button
-              onClick={() => handleCheckClick(setShipperOkpoChecked, shipperOkpoChecked)}
-              className={`ml-4 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                shipperOkpoChecked ? 'bg-[#3ABC96]' : 'bg-[#2860F0]'
-              } hover:opacity-80`}
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Футер с кнопками */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 px-6 flex justify-center gap-4 z-20">
-            <button
-              onClick={() => console.log('Сохранить')}
-              className="w-[161px] h-[54px] bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-all border border-white focus:shadow-[0_0_5px_#4D6BB7]"
-              style={{ boxShadow: 'none' }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 5px #4D6BB7';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              Сохранить
+              💾 Сохранить
             </button>
             <button
-              onClick={handlePrintClick}
-              className="w-[161px] h-[54px] bg-[#C5C6D0] hover:bg-[#3ABC96] hover:text-white hover:border-white text-[#919191] font-medium rounded-lg transition-all border border-[#919191] focus:shadow-[0_0_5px_#2B8B6F]"
+              onClick={handleOpenPrintModal}
+              className="flex-1 py-3 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors"
             >
-              Печать
-            </button>
-            <button
-              onClick={() => console.log('В накладную')}
-              className="w-[161px] h-[54px] bg-[#C5C6D0] hover:bg-[#3ABC96] hover:text-white hover:border-white text-[#919191] font-medium rounded-lg transition-all border border-[#919191] focus:shadow-[0_0_5px_#2B8B6F]"
-            >
-              В накладную
+              🖨️ Печать
             </button>
           </div>
-
-          {/* Отступ для футера */}
-          <div className="h-24" />
         </div>
       </div>
-
-      {/* Модальное окно выбора печатных форм */}
-      {isPrintModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="w-[500px] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl">
-            <div className="bg-[#C9D9FF] px-6 py-3">
-              <h3 className="text-lg font-semibold text-[#2860F0]">Выберите необходимые печатные формы</h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedForms.gu12}
-                  onChange={() => handleFormCheck('gu12')}
-                  className="w-5 h-5 accent-[#7C5CFC] bg-[#BBB1FA] border border-[#919191] rounded"
-                />
-                <span className="text-white text-lg">Гу-12</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedForms.gu114}
-                  onChange={() => handleFormCheck('gu114')}
-                  className="w-5 h-5 accent-[#7C5CFC] bg-[#BBB1FA] border border-[#919191] rounded"
-                />
-                <span className="text-white text-lg">ГУ-114</span>
-              </label>
-            </div>
-            <div className="flex gap-3 px-6 pb-6">
-              <button
-                onClick={handleAcceptPrint}
-                className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg transition-colors"
-              >
-                Принять
-              </button>
-              <button
-                onClick={() => setIsPrintModalOpen(false)}
-                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
-              >
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Модальное окно печатной формы */}
-      {isPrintFormModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto py-8">
-          <div className="w-[800px] max-h-[90vh] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl flex flex-col">
-            <div className="bg-[#C9D9FF] px-6 py-3">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Печатная форма
-              </h3>
-            </div>
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="space-y-3">
-                  <div className="bg-[#C9D9FF] rounded-lg p-3">
-                    <p className="text-gray-800">Содержимое печатной формы будет здесь</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
-              <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
-              >
-                Печать
-              </button>
-              <button
-                onClick={() => setIsPrintFormModalOpen(false)}
-                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors border border-white"
-              >
-                Закрыть
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
