@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Login } from './pages/Login';
+import { Login } from './pages/Login'; 
 import { AdminPanel } from './pages/AdminPanel';
 import { UserDashboard } from './pages/UserDashboard';
 import './app.css';
@@ -26,7 +26,7 @@ function App() {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+    return <Login onLogin={handleLogin}/>;
   }
 
   if (userRole === 'admin') {
