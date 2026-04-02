@@ -2,17 +2,26 @@ import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { ApplicationForm } from './ApplicationForm';
 import { Documents } from './Documents';  // <-- ЭТОТ ИМПОРТ НУЖЕН
+import { WaybillFormPage } from './WaybillFormPage';
+
 
 interface UserDashboardProps {
   userName: string;
   userId?: number;
   onLogout: () => void;
+  
 }
 
 export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps) {
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
+const [showWaybillForm, setShowWaybillForm] = useState(false);
 
+
+// В return, где проверяются страницы
+if (showWaybillForm) {
+  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
+}
   // Функции для навигации
   const handleNavigateToApplication = () => {
     setCurrentPage('application');
@@ -41,17 +50,22 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
   const handleNavigateToMyDocuments = () => {
     setCurrentPage('myDocuments');
   };
-
+ const handleNavigateToWaybillForm = () => {
+    setShowWaybillForm(true);
+  };
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
   };
-
+ 
+  if (showWaybillForm) {
+    return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
+  }
   // Проверка страниц
   if (currentPage === 'application') {
     return <ApplicationForm onBack={handleBackToDashboard} onLogout={onLogout} />;
   }
 
-  if (currentPage === 'myDocuments') {
+   if (currentPage === 'myDocuments') {
     return (
       <Documents
         userName={userName}
@@ -59,6 +73,8 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
         userRole="user"
         onBack={handleBackToDashboard}
         onLogout={onLogout}
+      
+        onNavigateToWaybill={handleNavigateToWaybillForm}  // Здесь передаём новую функцию
       />
     );
   }

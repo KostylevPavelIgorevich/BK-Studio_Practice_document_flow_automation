@@ -7,6 +7,9 @@ interface DocumentsProps {
   userRole: 'admin' | 'user';
   onBack: () => void;
   onLogout: () => void;
+  onNavigateToWaybill?: () => void;
+  
+  
 }
 
 // Заглушка данных для документов (разные для разных пользователей)
@@ -169,7 +172,7 @@ const otherFormsData: Record<string, any> = {
   },
 };
 
-export function Documents({ userName, userId, userRole, onBack, onLogout }: DocumentsProps) {
+export function Documents({ userName, userId, userRole, onBack, onLogout,onNavigateToWaybill }: DocumentsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -178,7 +181,14 @@ export function Documents({ userName, userId, userRole, onBack, onLogout }: Docu
   const [selectedDocument, setSelectedDocument] = useState<{ id: number; type: string; date: string } | null>(null);
   const [selectedOtherForm, setSelectedOtherForm] = useState<string | null>(null);
   const [selectedFormData, setSelectedFormData] = useState<any>(null);
-  
+  const [showWaybillModal, setShowWaybillModal] = useState(false);
+const handleOpenWaybillModal = () => {
+  setShowWaybillModal(true);
+};
+
+const handleCloseWaybillModal = () => {
+  setShowWaybillModal(false);
+};
   // Состояния для админского выбора пользователя
   const [selectedUserId, setSelectedUserId] = useState<number | null>(userId || null);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -388,7 +398,40 @@ export function Documents({ userName, userId, userRole, onBack, onLogout }: Docu
           )}
         </div>
       </div>
-
+{/* Модальное окно "В накладную" */}
+{showWaybillModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="w-[450px] bg-[#8778C3] rounded-lg overflow-hidden shadow-xl">
+      <div className="bg-[#E4E0FF] px-6 py-3">
+        <h3 className="text-lg font-semibold text-gray-800">Внимание!</h3>
+      </div>
+      <div className="p-6">
+        <p className="text-white text-center">
+          Вы переходите к заполнению накладной -<br />
+          после перехода заявку распечатать будет невозможно
+        </p>
+      </div>
+      <div className="flex gap-3 px-6 pb-6">
+        <button
+          onClick={() => {
+            setShowWaybillModal(false);
+            // Переход на страницу оформления накладной
+            onNavigateToWaybill?.();
+          }}
+          className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg transition-colors"
+        >
+          Принять
+        </button>
+        <button
+          onClick={handleCloseWaybillModal}
+          className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Модальное окно для выбора прочей формы */}
       {isOtherFormsModalOpen && selectedDocument && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -777,20 +820,30 @@ export function Documents({ userName, userId, userRole, onBack, onLogout }: Docu
                 </div>
               </div>
             </div>
-            <div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
-              <button
-                onClick={() => window.print()}
-                className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
-              >
-                Печать
-              </button>
-              <button
-                onClick={() => setIsPrintModalOpen(false)}
-                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors border border-white"
-              >
-                Закрыть
-              </button>
-            </div>
+           {/* Футер с кнопками */}
+<div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
+  <button
+    onClick={handleOpenPrintForm}
+    className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
+  >
+    🖨️ Печатная форма
+  </button>
+  <button
+    onClick={() => {
+      // Логика сохранения
+      console.log('Сохранить');
+    }}
+    className="flex-1 py-2 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors border border-white"
+  >
+    💾 Сохранить
+  </button>
+<button
+  onClick={handleOpenWaybillModal}
+  className="flex-1 py-2 bg-[#7C5CFC] hover:bg-[#6a48e8] text-white font-medium rounded-lg transition-colors border border-white"
+>
+  📄 В накладную
+</button>
+</div>
           </div>
         </div>
       )}

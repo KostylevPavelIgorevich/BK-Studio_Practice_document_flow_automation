@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { UserRow } from '../components/UserRow';
+import { WaybillFormPage } from './WaybillFormPage';
+
 
 import { Documents } from './Documents';
 
@@ -8,6 +10,8 @@ import { Documents } from './Documents';
 interface AdminPanelProps {
   onLogout: () => void;
 }
+
+
 
 // Заглушка данных для групп
 const mockGroups = [
@@ -35,7 +39,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [groupSearch, setGroupSearch] = useState('');
   const [groups, setGroups] = useState(mockGroups);
   const [sortGroupsAsc, setSortGroupsAsc] = useState(true);
-
+const [showWaybillForm, setShowWaybillForm] = useState(false);
   // Состояния для правой панели
   const [userSearch, setUserSearch] = useState('');
   const [users, setUsers] = useState(mockUsers);
@@ -59,7 +63,14 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [newGroupName, setNewGroupName] = useState('');
   const [editGroupName, setEditGroupName] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  
+  const handleNavigateToWaybill = () => {
+  setShowWaybillForm(true);
+};
+
+// В return, где проверяются страницы
+if (showWaybillForm) {
+  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
+}
   const [newUser, setNewUser] = useState({
     login: '',
     password: '',
@@ -182,17 +193,17 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     setIsEditUserModalOpen(true);
   };
 
-  const handleSelectUserToEdit = (user: typeof mockUsers[0]) => {
-    setEditUser({
-      id: user.id,
-      login: user.login,
-      password: user.password,
-      lastName: user.lastName,
-      firstName: user.firstName,
-      middleName: user.middleName,
-      groupId: user.groupId,
-    });
-  };
+const handleSelectUserToEdit = (user: typeof mockUsers[0]) => {
+  setEditUser({
+    id: user.id,
+    login: user.login,
+    password: user.password,
+    lastName: user.lastName,
+    firstName: user.firstName,
+    middleName: user.middleName,
+    groupId: user.groupId,
+  });
+};
 
   const handleAcceptEditUser = () => {
     if (editUser.id) {
@@ -215,9 +226,18 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
   // Обработчики для перехода к документам
 const handleSelectUser = (userId: number, fullName: string) => {
-  setSelectedUserId(userId);
-  setSelectedUserName(fullName);
-  setShowDocuments(true);
+  // Если открыто модальное окно редактирования пользователя
+  if (isEditUserModalOpen) {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      handleSelectUserToEdit(user);
+    }
+  } else {
+    // Иначе открываем страницу документов
+    setSelectedUserId(userId);
+    setSelectedUserName(fullName);
+    setShowDocuments(true);
+  }
 };
 
 const handleBackToAdmin = () => {
@@ -227,6 +247,14 @@ const handleBackToAdmin = () => {
 };
 
   // Если открыта страница документов, показываем её
+// ========== ПРОВЕРКИ СТРАНИЦ ==========
+
+// ЭТО НУЖНО ВСТАВИТЬ ПЕРЕД if (showDocuments)
+if (showWaybillForm) {
+  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
+}
+
+// Проверка на показ документов (ЭТО УЖЕ ЕСТЬ)
 if (showDocuments) {
   return (
     <Documents
@@ -235,6 +263,7 @@ if (showDocuments) {
       userRole="admin"
       onBack={handleBackToAdmin}
       onLogout={onLogout}
+      onNavigateToWaybill={handleNavigateToWaybill}
     />
   );
 }
@@ -282,24 +311,32 @@ if (showDocuments) {
           />
 
           <div className="bg-[#7C5CFC] rounded-lg px-4 py-2">
-            <h2 className="text-white font-semibold">Группы учащихся</h2>
-          </div>
+  <div className="flex items-center justify-between text-white font-semibold">
+    <h2>Группы учащихся</h2>
+    <button onClick={() => setSortGroupsAsc(!sortGroupsAsc)} className="hover:opacity-80">
+      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+      </svg>
+    </button>
+  </div>
+</div>
+
 
           <div className="bg-white rounded-lg shadow-md max-h-[400px] overflow-y-auto">
-            {sortedGroups.map((group) => (
-              <div
-                key={group.id}
-                className="px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                onClick={() => {
-                  if (isEditGroupModalOpen) {
-                    handleSelectGroupToEdit(group.id, group.name);
-                  }
-                }}
-              >
-                <span className="text-gray-700">{group.name}</span>
-              </div>
-            ))}
-          </div>
+  {sortedGroups.map((group) => (
+    <div
+      key={group.id}
+      className="px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+      onClick={() => {
+        if (isEditGroupModalOpen) {
+          handleSelectGroupToEdit(group.id, group.name);
+        }
+      }}
+    >
+      <span className="text-gray-700">{group.name}</span>
+    </div>
+  ))}
+</div>
 
           <p className="text-sm text-gray-500 text-center">Список всех обучаемых</p>
         </div>
