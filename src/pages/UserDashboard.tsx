@@ -1,27 +1,23 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { ApplicationForm } from './ApplicationForm';
-import { Documents } from './Documents';  // <-- ЭТОТ ИМПОРТ НУЖЕН
+import { Documents } from './Documents';
 import { WaybillFormPage } from './WaybillFormPage';
+import { WaybillNewPage } from './WaybillNewPage';
 
 
 interface UserDashboardProps {
   userName: string;
   userId?: number;
   onLogout: () => void;
-  
 }
 
 export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps) {
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
-const [showWaybillForm, setShowWaybillForm] = useState(false);
+  const [showWaybillForm, setShowWaybillForm] = useState(false);
+  const [showWaybillNewPage, setShowWaybillNewPage] = useState(false);
 
-
-// В return, где проверяются страницы
-if (showWaybillForm) {
-  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
-}
   // Функции для навигации
   const handleNavigateToApplication = () => {
     setCurrentPage('application');
@@ -47,25 +43,28 @@ if (showWaybillForm) {
     console.log('Переход на страницу печатных форм');
   };
 
-  const handleNavigateToMyDocuments = () => {
-    setCurrentPage('myDocuments');
+  const handleNavigateToWaybillNew = () => {
+    setShowWaybillNewPage(true);
   };
- const handleNavigateToWaybillForm = () => {
-    setShowWaybillForm(true);
-  };
+
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
   };
- 
+
+  // ========== ПРОВЕРКИ СТРАНИЦ ==========
+  if (showWaybillNewPage) {
+    return <WaybillNewPage onBack={() => setShowWaybillNewPage(false)} onLogout={onLogout} />;
+  }
+
   if (showWaybillForm) {
     return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
   }
-  // Проверка страниц
+
   if (currentPage === 'application') {
     return <ApplicationForm onBack={handleBackToDashboard} onLogout={onLogout} />;
   }
 
-   if (currentPage === 'myDocuments') {
+  if (currentPage === 'myDocuments') {
     return (
       <Documents
         userName={userName}
@@ -73,8 +72,6 @@ if (showWaybillForm) {
         userRole="user"
         onBack={handleBackToDashboard}
         onLogout={onLogout}
-      
-        onNavigateToWaybill={handleNavigateToWaybillForm}  // Здесь передаём новую функцию
       />
     );
   }
@@ -122,7 +119,7 @@ if (showWaybillForm) {
       defaultBorder: 'border-transparent',
       hoverBorder: 'border-2 border-[#7C5CFC]',
       row: 1,
-      onClick: handleNavigateToWaybill,
+      onClick: handleNavigateToWaybillNew,  // ← исправлено
     },
     // Вторая строка
     {
@@ -167,26 +164,10 @@ if (showWaybillForm) {
       row: 2,
       onClick: handleNavigateToPrint,
     },
-    // Третья строка - Мои документы
-    {
-      id: 'myDocuments',
-      title: 'Мои\nдокументы',
-      width: 'w-[400px]',
-      height: 'h-[260px]',
-      defaultBg: 'bg-[#7C5CFC]',
-      hoverBg: 'bg-[#E4E0FF]',
-      defaultText: 'text-white',
-      hoverText: 'text-[#7C5CFC]',
-      defaultBorder: 'border-transparent',
-      hoverBorder: 'border-2 border-[#7C5CFC]',
-      row: 3,
-      onClick: handleNavigateToMyDocuments,
-    },
   ];
 
   const firstRowButtons = buttons.filter(btn => btn.row === 1);
   const secondRowButtons = buttons.filter(btn => btn.row === 2);
-  const thirdRowButtons = buttons.filter(btn => btn.row === 3);
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
@@ -253,39 +234,6 @@ if (showWaybillForm) {
           {/* Вторая строка кнопок */}
           <div className="flex gap-6 justify-center mb-6">
             {secondRowButtons.map((button) => {
-              const isHovered = hoveredButton === button.id;
-              return (
-                <button
-                  key={button.id}
-                  onClick={button.onClick}
-                  onMouseEnter={() => setHoveredButton(button.id)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  className={`
-                    ${button.width}
-                    ${button.height}
-                    ${isHovered ? button.hoverBg : button.defaultBg}
-                    ${isHovered ? button.hoverText : button.defaultText}
-                    ${isHovered ? button.hoverBorder : button.defaultBorder}
-                    rounded-2xl shadow-lg transition-all duration-300
-                    flex items-center justify-center text-center font-bold text-xl
-                    whitespace-pre-line relative z-10
-                    ${isHovered ? 'scale-105 shadow-2xl' : 'hover:scale-105 hover:shadow-2xl'}
-                  `}
-                  style={{
-                    boxShadow: isHovered 
-                      ? '0 0 0 4px white, 0 0 0 8px rgba(0,0,0,0.1)' 
-                      : undefined
-                  }}
-                >
-                  {button.title}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Третья строка кнопок - Мои документы */}
-          <div className="flex gap-6 justify-center">
-            {thirdRowButtons.map((button) => {
               const isHovered = hoveredButton === button.id;
               return (
                 <button

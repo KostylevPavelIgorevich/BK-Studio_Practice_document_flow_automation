@@ -38,6 +38,10 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
     setSelectedSendType(app.sendType);
   };
 
+  const handleContinue = () => {
+    console.log('Продолжить с выбранной заявкой:', { selectedApplication, selectedSendType, waybillType });
+  };
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -64,16 +68,16 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
         </button>
       </div>
 
-      {/* Основной контент */}
+      {/* Основной контент - во всю ширину */}
       <div className="pt-20 px-6 pb-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Заголовок */}
-          <div className="bg-[#7C5CFC] py-4 px-6 rounded-t-lg">
+        <div className="w-full">
+          {/* Заголовок - во всю ширину */}
+          <div className="bg-[#7C5CFC] py-4 px-6 rounded-t-lg w-full">
             <h1 className="text-xl font-bold text-white">Сведения о перевозочном документе</h1>
           </div>
 
-          {/* Форма */}
-          <div className="bg-white rounded-b-lg shadow-lg p-6 space-y-5">
+          {/* Форма - во всю ширину */}
+          <div className="bg-white rounded-b-lg shadow-lg p-6 space-y-5 w-full">
             {/* Вариант оформления */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -110,28 +114,22 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
             </div>
           </div>
 
-          {/* Кнопки */}
-          <div className="flex gap-4 mt-6">
+          {/* Кнопка Продолжить - только справа */}
+          <div className="flex justify-end mt-6">
             <button
-              onClick={() => console.log('Создать накладную')}
-              className="flex-1 py-3 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors"
+              onClick={handleContinue}
+              className="px-8 py-3 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors"
             >
-              Создать накладную
-            </button>
-            <button
-              onClick={onBack}
-              className="flex-1 py-3 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
-            >
-              Отмена
+              Продолжить
             </button>
           </div>
         </div>
       </div>
 
-      {/* Модальное окно выбора заявки ГУ-12 */}
+      {/* Модальное окно выбора заявки ГУ-12 - во всю ширину */}
       {showApplicationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="w-[550px] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl">
+          <div className="w-[90%] max-w-[800px] bg-[#6990F5] rounded-lg overflow-hidden shadow-xl">
             <div className="bg-[#C9D9FF] px-6 py-3">
               <h3 className="text-lg font-semibold text-gray-800">Заявка ГУ-12</h3>
             </div>
@@ -153,7 +151,7 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
                 </select>
               </div>
 
-              {/* Сохранённые заявки */}
+              {/* Сохранённые заявки - текст черным */}
               <div className="mb-4">
                 <label className="block text-white text-sm mb-1">Сохранённые заявки</label>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -168,10 +166,10 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
                       }`}
                     >
                       <div className="flex justify-between">
-                        <span className="font-medium">№{app.number}</span>
-                        <span className="text-sm">{app.date}</span>
+                        <span className="font-medium text-gray-800">№{app.number}</span>
+                        <span className="text-sm text-gray-600">{app.date}</span>
                       </div>
-                      <div className="text-sm mt-1">Вид отправки: {app.sendType}</div>
+                      <div className="text-sm text-gray-600 mt-1">Вид отправки: {app.sendType}</div>
                     </div>
                   ))}
                 </div>
@@ -185,7 +183,7 @@ export function WaybillFormPage({ onBack, onLogout }: WaybillFormPageProps) {
                 }}
                 className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg transition-colors"
               >
-                Выбрать
+                Принять
               </button>
               <button
                 onClick={() => {
