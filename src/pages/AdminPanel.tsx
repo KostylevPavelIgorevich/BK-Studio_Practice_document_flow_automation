@@ -1,45 +1,22 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { UserRow } from '../components/UserRow';
-import { WaybillFormPage } from './WaybillFormPage';
-
-
 import { Documents } from './Documents';
-
 
 interface AdminPanelProps {
   onLogout: () => void;
 }
 
-
-
-// Заглушка данных для групп
-const mockGroups = [
-  { id: 1, name: 'Иванов Иван Иванович' },
-  { id: 2, name: 'Петров Петр Петрович' },
-  { id: 3, name: 'Сидоров Сидор Сидорович' },
-  { id: 4, name: 'Кузнецова Анна Сергеевна' },
-  { id: 5, name: 'Смирнов Алексей Дмитриевич' },
-];
-
-// Заглушка данных для пользователей
-const mockUsers = [
-  { id: 1, lastName: 'Алексеев', firstName: 'Алексей', middleName: 'Алексеевич', login: 'alekseev', password: '123', groupId: 1 },
-  { id: 2, lastName: 'Борисова', firstName: 'Борислава', middleName: 'Борисовна', login: 'borisova', password: '123', groupId: 2 },
-  { id: 3, lastName: 'Владимиров', firstName: 'Владимир', middleName: 'Владимирович', login: 'vladimirov', password: '123', groupId: 3 },
-  { id: 4, lastName: 'Григорьев', firstName: 'Григорий', middleName: 'Григорьевич', login: 'grigoriev', password: '123', groupId: 4 },
-  { id: 5, lastName: 'Дмитриева', firstName: 'Дарья', middleName: 'Дмитриевна', login: 'dmitrieva', password: '123', groupId: 5 },
-  { id: 6, lastName: 'Евгеньев', firstName: 'Евгений', middleName: 'Евгеньевич', login: 'evgenev', password: '123', groupId: 1 },
-  { id: 7, lastName: 'Жукова', firstName: 'Жанна', middleName: 'Жуковна', login: 'zhukova', password: '123', groupId: 2 },
-  { id: 8, lastName: 'Зайцев', firstName: 'Захар', middleName: 'Зайцевич', login: 'zaytsev', password: '123', groupId: 3 },
-];
+// Пустые заглушки (ты добавишь через интерфейс)
+const mockGroups: { id: number; name: string }[] = [];
+const mockUsers: { id: number; lastName: string; firstName: string; middleName: string; login: string; password: string; groupId: number }[] = [];
 
 export function AdminPanel({ onLogout }: AdminPanelProps) {
   // Состояния для левой панели
   const [groupSearch, setGroupSearch] = useState('');
   const [groups, setGroups] = useState(mockGroups);
   const [sortGroupsAsc, setSortGroupsAsc] = useState(true);
-const [showWaybillForm, setShowWaybillForm] = useState(false);
+
   // Состояния для правой панели
   const [userSearch, setUserSearch] = useState('');
   const [users, setUsers] = useState(mockUsers);
@@ -59,18 +36,14 @@ const [showWaybillForm, setShowWaybillForm] = useState(false);
   const [selectedUserName, setSelectedUserName] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   
+  // Состояния для выбранных элементов (подсветка)
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
+  const [selectedUserIdForEdit, setSelectedUserIdForEdit] = useState<number | null>(null);
+  
   // Данные для форм
   const [newGroupName, setNewGroupName] = useState('');
   const [editGroupName, setEditGroupName] = useState('');
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const handleNavigateToWaybill = () => {
-  setShowWaybillForm(true);
-};
-
-// В return, где проверяются страницы
-if (showWaybillForm) {
-  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
-}
+  
   const [newUser, setNewUser] = useState({
     login: '',
     password: '',
@@ -113,7 +86,7 @@ if (showWaybillForm) {
     return fullNameB.localeCompare(fullNameA);
   });
 
-  // Обработчики для групп
+  // ========== ОБРАБОТЧИКИ ДЛЯ ГРУПП ==========
   const handleCreateGroup = () => {
     setNewGroupName('');
     setIsCreateGroupModalOpen(true);
@@ -131,19 +104,25 @@ if (showWaybillForm) {
     }
   };
 
-  const handleEditGroup = () => {
-    setEditGroupName('');
-    setSelectedGroupId(null);
-    setIsEditGroupModalOpen(true);
+  // Выбор группы для редактирования (подсветка)
+  const handleSelectGroup = (groupId: number) => {
+    setSelectedGroupId(groupId);
   };
 
-  const handleSelectGroupToEdit = (groupId: number, groupName: string) => {
-    setSelectedGroupId(groupId);
-    setEditGroupName(groupName);
+  const handleEditGroup = () => {
+    if (selectedGroupId !== null) {
+      const group = groups.find(g => g.id === selectedGroupId);
+      if (group) {
+        setEditGroupName(group.name);
+        setIsEditGroupModalOpen(true);
+      }
+    } else {
+      alert('Сначала выберите группу из списка');
+    }
   };
 
   const handleAcceptEditGroup = () => {
-    if (selectedGroupId && editGroupName.trim()) {
+    if (selectedGroupId !== null && editGroupName.trim()) {
       setGroups(groups.map(group =>
         group.id === selectedGroupId
           ? { ...group, name: editGroupName.trim() }
@@ -155,7 +134,7 @@ if (showWaybillForm) {
     }
   };
 
-  // Обработчики для пользователей
+  // ========== ОБРАБОТЧИКИ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ ==========
   const handleCreateUser = () => {
     setNewUser({
       login: '',
@@ -179,31 +158,31 @@ if (showWaybillForm) {
     }
   };
 
-  const handleEditUser = () => {
-    setEditUserTab('userData');
-    setEditUser({
-      id: 0,
-      login: '',
-      password: '',
-      lastName: '',
-      firstName: '',
-      middleName: '',
-      groupId: groups[0]?.id || 1,
-    });
-    setIsEditUserModalOpen(true);
+  // Выбор пользователя для редактирования (подсветка)
+  const handleSelectUserForEdit = (userId: number) => {
+    setSelectedUserIdForEdit(userId);
   };
 
-const handleSelectUserToEdit = (user: typeof mockUsers[0]) => {
-  setEditUser({
-    id: user.id,
-    login: user.login,
-    password: user.password,
-    lastName: user.lastName,
-    firstName: user.firstName,
-    middleName: user.middleName,
-    groupId: user.groupId,
-  });
-};
+  const handleEditUser = () => {
+    if (selectedUserIdForEdit !== null) {
+      const user = users.find(u => u.id === selectedUserIdForEdit);
+      if (user) {
+        setEditUser({
+          id: user.id,
+          login: user.login,
+          password: user.password,
+          lastName: user.lastName,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          groupId: user.groupId,
+        });
+        setEditUserTab('userData');
+        setIsEditUserModalOpen(true);
+      }
+    } else {
+      alert('Сначала выберите пользователя из списка');
+    }
+  };
 
   const handleAcceptEditUser = () => {
     if (editUser.id) {
@@ -221,52 +200,35 @@ const handleSelectUserToEdit = (user: typeof mockUsers[0]) => {
           : user
       ));
       setIsEditUserModalOpen(false);
+      setSelectedUserIdForEdit(null);
     }
   };
 
-  // Обработчики для перехода к документам
-const handleSelectUser = (userId: number, fullName: string) => {
-  // Если открыто модальное окно редактирования пользователя
-  if (isEditUserModalOpen) {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      handleSelectUserToEdit(user);
-    }
-  } else {
-    // Иначе открываем страницу документов
+  // ========== ОБРАБОТЧИКИ ДЛЯ ДОКУМЕНТОВ (ДВОЙНОЙ КЛИК) ==========
+  const handleDoubleClickUser = (userId: number, fullName: string) => {
     setSelectedUserId(userId);
     setSelectedUserName(fullName);
     setShowDocuments(true);
+  };
+
+  const handleBackToAdmin = () => {
+    setShowDocuments(false);
+    setSelectedUserId(null);
+    setSelectedUserName('');
+  };
+
+  // ========== ПРОВЕРКИ СТРАНИЦ ==========
+  if (showDocuments) {
+    return (
+      <Documents
+        userName={selectedUserName}
+        userId={selectedUserId || undefined}
+        userRole="admin"
+        onBack={handleBackToAdmin}
+        onLogout={onLogout}
+      />
+    );
   }
-};
-
-const handleBackToAdmin = () => {
-  setShowDocuments(false);
-  setSelectedUserId(null);
-  setSelectedUserName('');
-};
-
-  // Если открыта страница документов, показываем её
-// ========== ПРОВЕРКИ СТРАНИЦ ==========
-
-// ЭТО НУЖНО ВСТАВИТЬ ПЕРЕД if (showDocuments)
-if (showWaybillForm) {
-  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
-}
-
-// Проверка на показ документов (ЭТО УЖЕ ЕСТЬ)
-if (showDocuments) {
-  return (
-    <Documents
-      userName={selectedUserName}
-      userId={selectedUserId || undefined}
-      userRole="admin"
-      onBack={handleBackToAdmin}
-      onLogout={onLogout}
-      onNavigateToWaybill={handleNavigateToWaybill}
-    />
-  );
-}
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
@@ -283,7 +245,7 @@ if (showDocuments) {
       </div>
 
       {/* Основной контент */}
-      <div className="flex gap-6 p-6 pt-20">
+      <div className="flex gap-6 p-6 pt-[41px]">
         
         {/* ЛЕВАЯ ПАНЕЛЬ - Группы */}
         <div className="w-1/4 space-y-4">
@@ -311,33 +273,30 @@ if (showDocuments) {
           />
 
           <div className="bg-[#7C5CFC] rounded-lg px-4 py-2">
-  <div className="flex items-center justify-between text-white font-semibold">
-    <h2>Группы учащихся</h2>
-    <button onClick={() => setSortGroupsAsc(!sortGroupsAsc)} className="hover:opacity-80">
-      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-      </svg>
-    </button>
-  </div>
-</div>
+            <div className="flex items-center justify-between text-white font-semibold">
+              <h2>Группы учащихся</h2>
+              <button onClick={() => setSortGroupsAsc(!sortGroupsAsc)} className="hover:opacity-80">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-
+          {/* Список групп с подсветкой выбранной */}
           <div className="bg-white rounded-lg shadow-md max-h-[400px] overflow-y-auto">
-  {sortedGroups.map((group) => (
-    <div
-      key={group.id}
-      className="px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-      onClick={() => {
-        if (isEditGroupModalOpen) {
-          handleSelectGroupToEdit(group.id, group.name);
-        }
-      }}
-    >
-      <span className="text-gray-700">{group.name}</span>
-    </div>
-  ))}
-</div>
-
+            {sortedGroups.map((group) => (
+              <div
+                key={group.id}
+                className={`px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                  selectedGroupId === group.id ? 'bg-blue-100 border-l-4 border-[#2860F0]' : ''
+                }`}
+                onClick={() => handleSelectGroup(group.id)}
+              >
+                <span className="text-gray-700">{group.name}</span>
+              </div>
+            ))}
+          </div>
           <p className="text-sm text-gray-500 text-center">Список всех обучаемых</p>
         </div>
 
@@ -377,7 +336,7 @@ if (showDocuments) {
               <div className="flex items-center justify-between text-white font-semibold">
                 <span>Фамилия</span>
                 <button onClick={() => setSortUsersAsc(!sortUsersAsc)} className="hover:opacity-80">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </button>
@@ -391,15 +350,25 @@ if (showDocuments) {
             </div>
           </div>
 
-          {/* Список пользователей с использованием компонента UserRow */}
+          {/* Список пользователей с двойным кликом для перехода к документам */}
           <div className="bg-white rounded-lg shadow-md max-h-[400px] overflow-y-auto">
-            {sortedUsers.map((user) => (
-              <UserRow
-                key={user.id}
-                user={user}
-                onSelectUser={handleSelectUser}
-              />
-            ))}
+            {sortedUsers.map((user) => {
+              const fullName = `${user.lastName} ${user.firstName} ${user.middleName}`;
+              return (
+                <div
+                  key={user.id}
+                  className={`grid grid-cols-3 gap-4 px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                    selectedUserIdForEdit === user.id ? 'bg-blue-100 border-l-4 border-[#2860F0]' : ''
+                  }`}
+                  onClick={() => handleSelectUserForEdit(user.id)}
+                  onDoubleClick={() => handleDoubleClickUser(user.id, fullName)}
+                >
+                  <span className="text-gray-700">{user.lastName}</span>
+                  <span className="text-gray-700">{user.firstName}</span>
+                  <span className="text-gray-700">{user.middleName}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -437,18 +406,17 @@ if (showDocuments) {
               <h3 className="text-lg font-semibold text-gray-800">Изменить группу</h3>
             </div>
             <div className="p-6">
-              <p className="text-sm text-white mb-2">Выберите группу из списка слева, затем измените название</p>
+              <p className="text-sm text-white mb-2">Выберите группу из списка слева</p>
               <input
                 type="text"
                 value={editGroupName}
                 onChange={(e) => setEditGroupName(e.target.value)}
                 placeholder="Новое название группы"
                 className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]"
-                disabled={!selectedGroupId}
               />
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={handleAcceptEditGroup} disabled={!selectedGroupId} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] disabled:bg-[#7faa88] text-white font-medium rounded-lg">Принять</button>
+              <button onClick={handleAcceptEditGroup} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg">Принять</button>
               <button onClick={() => setIsEditGroupModalOpen(false)} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg">Отмена</button>
             </div>
           </div>
@@ -463,12 +431,12 @@ if (showDocuments) {
               <h3 className="text-lg font-semibold text-gray-800">Создать пользователя</h3>
             </div>
             <div className="p-6 space-y-3">
-              <input type="text" value={newUser.login} onChange={(e) => setNewUser({...newUser, login: e.target.value})} placeholder="Логин" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" />
-              <input type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} placeholder="Пароль" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" />
-              <input type="text" value={newUser.lastName} onChange={(e) => setNewUser({...newUser, lastName: e.target.value})} placeholder="Фамилия" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" />
-              <input type="text" value={newUser.firstName} onChange={(e) => setNewUser({...newUser, firstName: e.target.value})} placeholder="Имя" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" />
-              <input type="text" value={newUser.middleName} onChange={(e) => setNewUser({...newUser, middleName: e.target.value})} placeholder="Отчество" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" />
-              <select value={newUser.groupId} onChange={(e) => setNewUser({...newUser, groupId: Number(e.target.value)})} className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:border-[#2860F0]">
+              <input type="text" value={newUser.login} onChange={(e) => setNewUser({...newUser, login: e.target.value})} placeholder="Логин" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800" />
+              <input type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} placeholder="Пароль" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800" />
+              <input type="text" value={newUser.lastName} onChange={(e) => setNewUser({...newUser, lastName: e.target.value})} placeholder="Фамилия" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800" />
+              <input type="text" value={newUser.firstName} onChange={(e) => setNewUser({...newUser, firstName: e.target.value})} placeholder="Имя" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800" />
+              <input type="text" value={newUser.middleName} onChange={(e) => setNewUser({...newUser, middleName: e.target.value})} placeholder="Отчество" className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800" />
+              <select value={newUser.groupId} onChange={(e) => setNewUser({...newUser, groupId: Number(e.target.value)})} className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-800">
                 {groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
               </select>
             </div>
@@ -495,23 +463,23 @@ if (showDocuments) {
               {editUserTab === 'userData' ? (
                 <>
                   <p className="text-sm text-white mb-1">Выберите пользователя из списка справа</p>
-                  <input type="text" value={editUser.lastName} onChange={(e) => setEditUser({...editUser, lastName: e.target.value})} placeholder="Фамилия" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id} />
-                  <input type="text" value={editUser.firstName} onChange={(e) => setEditUser({...editUser, firstName: e.target.value})} placeholder="Имя" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id} />
-                  <input type="text" value={editUser.middleName} onChange={(e) => setEditUser({...editUser, middleName: e.target.value})} placeholder="Отчество" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id} />
-                  <select value={editUser.groupId} onChange={(e) => setEditUser({...editUser, groupId: Number(e.target.value)})} className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id}>
+                  <input type="text" value={editUser.lastName} onChange={(e) => setEditUser({...editUser, lastName: e.target.value})} placeholder="Фамилия" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800" />
+                  <input type="text" value={editUser.firstName} onChange={(e) => setEditUser({...editUser, firstName: e.target.value})} placeholder="Имя" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800" />
+                  <input type="text" value={editUser.middleName} onChange={(e) => setEditUser({...editUser, middleName: e.target.value})} placeholder="Отчество" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800" />
+                  <select value={editUser.groupId} onChange={(e) => setEditUser({...editUser, groupId: Number(e.target.value)})} className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800">
                     {groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
                   </select>
                 </>
               ) : (
                 <>
                   <p className="text-sm text-white mb-1">Выберите пользователя из списка справа</p>
-                  <input type="text" value={editUser.login} onChange={(e) => setEditUser({...editUser, login: e.target.value})} placeholder="Логин" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id} />
-                  <input type="password" value={editUser.password} onChange={(e) => setEditUser({...editUser, password: e.target.value})} placeholder="Пароль" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#2860F0]" disabled={!editUser.id} />
+                  <input type="text" value={editUser.login} onChange={(e) => setEditUser({...editUser, login: e.target.value})} placeholder="Логин" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800" />
+                  <input type="password" value={editUser.password} onChange={(e) => setEditUser({...editUser, password: e.target.value})} placeholder="Пароль" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-800" />
                 </>
               )}
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={handleAcceptEditUser} disabled={!editUser.id} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] disabled:bg-[#7faa88] text-white font-medium rounded-lg">Сохранить</button>
+              <button onClick={handleAcceptEditUser} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg">Сохранить</button>
               <button onClick={() => setIsEditUserModalOpen(false)} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg">Отмена</button>
             </div>
           </div>

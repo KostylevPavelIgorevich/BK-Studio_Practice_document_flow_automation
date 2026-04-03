@@ -7,9 +7,6 @@ interface DocumentsProps {
   userRole: 'admin' | 'user';
   onBack: () => void;
   onLogout: () => void;
-  onNavigateToWaybill?: () => void;
-  
-  
 }
 
 // Заглушка данных для документов (разные для разных пользователей)
@@ -32,13 +29,6 @@ const allUsersDocuments: Record<number, Array<{ id: number; date: string; type: 
     { id: 3, date: '2024-03-12T08:30:00', type: 'Акт сверки', printForms: 'Акт сверки' },
   ],
 };
-
-// Заглушка списка всех пользователей для админа
-const allUsersList = [
-  { id: 1, name: 'Алексеев Алексей Алексеевич' },
-  { id: 2, name: 'Борисова Борислава Борисовна' },
-  { id: 3, name: 'Владимиров Владимир Владимирович' },
-];
 
 // Данные для заявки
 const applicationData = {
@@ -172,7 +162,7 @@ const otherFormsData: Record<string, any> = {
   },
 };
 
-export function Documents({ userName, userId, userRole, onBack, onLogout,onNavigateToWaybill }: DocumentsProps) {
+export function Documents({ userName, userId, userRole, onBack, onLogout }: DocumentsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -181,26 +171,17 @@ export function Documents({ userName, userId, userRole, onBack, onLogout,onNavig
   const [selectedDocument, setSelectedDocument] = useState<{ id: number; type: string; date: string } | null>(null);
   const [selectedOtherForm, setSelectedOtherForm] = useState<string | null>(null);
   const [selectedFormData, setSelectedFormData] = useState<any>(null);
-  const [showWaybillModal, setShowWaybillModal] = useState(false);
-const handleOpenWaybillModal = () => {
-  setShowWaybillModal(true);
-};
-
-const handleCloseWaybillModal = () => {
-  setShowWaybillModal(false);
-};
+  
   // Состояния для админского выбора пользователя
   const [selectedUserId, setSelectedUserId] = useState<number | null>(userId || null);
   const [documents, setDocuments] = useState<any[]>([]);
 
   // Загрузка документов в зависимости от роли и выбранного пользователя
   useEffect(() => {
-    if (userRole === 'admin' && selectedUserId) {
+    if (selectedUserId) {
       setDocuments(allUsersDocuments[selectedUserId] || []);
-    } else if (userRole === 'user' && userId) {
-      setDocuments(allUsersDocuments[userId] || []);
     }
-  }, [userRole, userId, selectedUserId]);
+  }, [selectedUserId]);
 
   // Фильтрация документов по поиску
   const filteredDocuments = documents.filter(doc =>
@@ -267,15 +248,6 @@ const handleCloseWaybillModal = () => {
     }
   };
 
-  // Получение имени пользователя для отображения
-  const getDisplayUserName = () => {
-    if (userRole === 'admin' && selectedUserId) {
-      const user = allUsersList.find(u => u.id === selectedUserId);
-      return user?.name || 'Выбранный пользователь';
-    }
-    return userName || 'Пользователь';
-  };
-
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -309,27 +281,7 @@ const handleCloseWaybillModal = () => {
           {/* Информация о пользователе */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Документы пользователя</h1>
-            <p className="text-gray-600 mt-1">
-              Пользователь: <span className="font-semibold text-[#2860F0]">{getDisplayUserName()}</span>
-            </p>
           </div>
-
-          {/* Для админа - выбор пользователя */}
-          {userRole === 'admin' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Выберите пользователя:</label>
-              <select
-                value={selectedUserId || ''}
-                onChange={(e) => setSelectedUserId(Number(e.target.value))}
-                className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-[#2860F0] focus:ring-1 focus:ring-[#2860F0]"
-              >
-                <option value="">Выберите пользователя</option>
-                {allUsersList.map(user => (
-                  <option key={user.id} value={user.id}>{user.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Поиск */}
           <div className="flex gap-4 mb-6">
@@ -384,7 +336,7 @@ const handleCloseWaybillModal = () => {
                 ))
               ) : (
                 <div className="px-6 py-8 text-center text-gray-500" style={{ backgroundColor: '#EFECF9' }}>
-                  {!selectedUserId ? 'Выберите пользователя для просмотра документов' : 'Документы не найдены'}
+                  Документы не найдены
                 </div>
               )}
             </div>
@@ -398,40 +350,7 @@ const handleCloseWaybillModal = () => {
           )}
         </div>
       </div>
-{/* Модальное окно "В накладную" */}
-{showWaybillModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="w-[450px] bg-[#8778C3] rounded-lg overflow-hidden shadow-xl">
-      <div className="bg-[#E4E0FF] px-6 py-3">
-        <h3 className="text-lg font-semibold text-gray-800">Внимание!</h3>
-      </div>
-      <div className="p-6">
-        <p className="text-white text-center">
-          Вы переходите к заполнению накладной -<br />
-          после перехода заявку распечатать будет невозможно
-        </p>
-      </div>
-      <div className="flex gap-3 px-6 pb-6">
-        <button
-          onClick={() => {
-            setShowWaybillModal(false);
-            // Переход на страницу оформления накладной
-            onNavigateToWaybill?.();
-          }}
-          className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg transition-colors"
-        >
-          Принять
-        </button>
-        <button
-          onClick={handleCloseWaybillModal}
-          className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
-        >
-          Отмена
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+
       {/* Модальное окно для выбора прочей формы */}
       {isOtherFormsModalOpen && selectedDocument && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -647,7 +566,7 @@ const handleCloseWaybillModal = () => {
                 onClick={handleOpenPrintForm}
                 className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
               >
-                Печатная форма
+                🖨️ Печатная форма
               </button>
               <button
                 onClick={() => {
@@ -656,7 +575,7 @@ const handleCloseWaybillModal = () => {
                 }}
                 className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors border border-white"
               >
-                Закрыть
+                ❌ Закрыть
               </button>
             </div>
           </div>
@@ -820,30 +739,22 @@ const handleCloseWaybillModal = () => {
                 </div>
               </div>
             </div>
-           {/* Футер с кнопками */}
-<div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
-  <button
-    onClick={handleOpenPrintForm}
-    className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
-  >
-    🖨️ Печатная форма
-  </button>
-  <button
-    onClick={() => {
-      // Логика сохранения
-      console.log('Сохранить');
-    }}
-    className="flex-1 py-2 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors border border-white"
-  >
-    💾 Сохранить
-  </button>
-<button
-  onClick={handleOpenWaybillModal}
-  className="flex-1 py-2 bg-[#7C5CFC] hover:bg-[#6a48e8] text-white font-medium rounded-lg transition-colors border border-white"
->
-  📄 В накладную
-</button>
-</div>
+            
+            {/* Футер с кнопками только для печати и закрытия */}
+            <div className="bg-[#C9D9FF] px-6 py-4 flex gap-3">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-2 bg-[#2860F0] hover:bg-[#4475F7] text-white font-medium rounded-lg transition-colors border border-white"
+              >
+                🖨️ Печать
+              </button>
+              <button
+                onClick={() => setIsPrintModalOpen(false)}
+                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors border border-white"
+              >
+                ❌ Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}
