@@ -47,12 +47,8 @@ if (showWaybillForm) {
     console.log('Переход на страницу печатных форм');
   };
 
-  const handleNavigateToMyDocuments = () => {
-    setCurrentPage('myDocuments');
-  };
- const handleNavigateToWaybillForm = () => {
-    setShowWaybillForm(true);
-  };
+
+
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
   };
@@ -74,7 +70,7 @@ if (showWaybillForm) {
         onBack={handleBackToDashboard}
         onLogout={onLogout}
       
-        onNavigateToWaybill={handleNavigateToWaybillForm}  // Здесь передаём новую функцию
+        
       />
     );
   }
@@ -167,27 +163,12 @@ if (showWaybillForm) {
       row: 2,
       onClick: handleNavigateToPrint,
     },
-    // Третья строка - Мои документы
-    {
-      id: 'myDocuments',
-      title: 'Мои\nдокументы',
-      width: 'w-[400px]',
-      height: 'h-[260px]',
-      defaultBg: 'bg-[#7C5CFC]',
-      hoverBg: 'bg-[#E4E0FF]',
-      defaultText: 'text-white',
-      hoverText: 'text-[#7C5CFC]',
-      defaultBorder: 'border-transparent',
-      hoverBorder: 'border-2 border-[#7C5CFC]',
-      row: 3,
-      onClick: handleNavigateToMyDocuments,
-    },
+   
   ];
 
   const firstRowButtons = buttons.filter(btn => btn.row === 1);
   const secondRowButtons = buttons.filter(btn => btn.row === 2);
-  const thirdRowButtons = buttons.filter(btn => btn.row === 3);
-
+ 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -283,38 +264,7 @@ if (showWaybillForm) {
             })}
           </div>
 
-          {/* Третья строка кнопок - Мои документы */}
-          <div className="flex gap-6 justify-center">
-            {thirdRowButtons.map((button) => {
-              const isHovered = hoveredButton === button.id;
-              return (
-                <button
-                  key={button.id}
-                  onClick={button.onClick}
-                  onMouseEnter={() => setHoveredButton(button.id)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  className={`
-                    ${button.width}
-                    ${button.height}
-                    ${isHovered ? button.hoverBg : button.defaultBg}
-                    ${isHovered ? button.hoverText : button.defaultText}
-                    ${isHovered ? button.hoverBorder : button.defaultBorder}
-                    rounded-2xl shadow-lg transition-all duration-300
-                    flex items-center justify-center text-center font-bold text-xl
-                    whitespace-pre-line relative z-10
-                    ${isHovered ? 'scale-105 shadow-2xl' : 'hover:scale-105 hover:shadow-2xl'}
-                  `}
-                  style={{
-                    boxShadow: isHovered 
-                      ? '0 0 0 4px white, 0 0 0 8px rgba(0,0,0,0.1)' 
-                      : undefined
-                  }}
-                >
-                  {button.title}
-                </button>
-              );
-            })}
-          </div>
+         
         </div>
       </div>
 
