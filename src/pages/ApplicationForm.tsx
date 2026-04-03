@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '../components/Navbar';
+import { WaybillFormPage } from './WaybillFormPage';
 
 interface ApplicationFormProps {
   onBack: () => void;
   onLogout: () => void;
-  onNavigateToWaybill?: () => void;
 }
 
 // Типы документов
@@ -50,13 +50,14 @@ const fieldsConfig: Record<string, Array<{ key: string; label: string; type: str
   ],
 };
 
-export function ApplicationForm({ onBack, onLogout, onNavigateToWaybill }: ApplicationFormProps) {
+export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
   // Состояния
   const [selectedDocType, setSelectedDocType] = useState('gu12');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showNotification, setShowNotification] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showWaybillModal, setShowWaybillModal] = useState(false);
+  const [showWaybillForm, setShowWaybillForm] = useState(false);
   
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -97,47 +98,61 @@ export function ApplicationForm({ onBack, onLogout, onNavigateToWaybill }: Appli
   };
 
   // Выполнить печать
- const handlePrint = () => {
-  const printContent = document.getElementById('print-content');
-  if (!printContent) {
-    console.error('print-content not found');
-    return;
-  }
-  
-  const originalTitle = document.title;
-  document.title = getSelectedDocName();
-  
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>${getSelectedDocName()}</title>
-          <style>
-            body { font-family: 'Times New Roman', serif; padding: 40px; }
-            .print-container { max-width: 800px; margin: 0 auto; }
-            .field-row { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed #ccc; display: flex; }
-            .field-label { width: 200px; font-weight: bold; }
-            .field-value { flex: 1; }
-            h1 { text-align: center; border-bottom: 2px solid #2860F0; padding-bottom: 10px; }
-            @media print { body { padding: 20px; } }
-          </style>
-        </head>
-        <body>
-          <div class="print-container">
-            <h1>${getSelectedDocName()}</h1>
-            ${printContent.innerHTML}
-          </div>
-          <script>window.onload = () => { window.print(); window.close(); };</script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  }
-  
-  document.title = originalTitle;
-  setShowPrintModal(false);
-};
+  const handlePrint = () => {
+    const printContent = document.getElementById('print-content');
+    if (!printContent) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Документ</title>
+            <meta charset="UTF-8">
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: 'Times New Roman', 'Georgia', serif; background: white; padding: 40px; margin: 0; }
+              .document { max-width: 800px; margin: 0 auto; background: white; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+              .header { text-align: center; padding: 30px 30px 20px; border-bottom: 2px solid #2860F0; }
+              .header h1 { font-size: 24px; font-weight: bold; color: #1a2c3e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+              .header .form-number { font-size: 14px; color: #666; margin-top: 5px; }
+              .header .date { font-size: 12px; color: #999; margin-top: 10px; }
+              .content { padding: 30px; }
+              .info-row { display: flex; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #e0e0e0; }
+              .info-label { width: 180px; font-weight: 600; color: #2c3e50; font-size: 14px; }
+              .info-value { flex: 1; color: #1a2c3e; font-size: 14px; line-height: 1.5; }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 11px; color: #999; }
+              .stamp { margin-top: 30px; display: flex; justify-content: space-between; padding: 0 20px; }
+              .stamp div { text-align: center; font-size: 12px; color: #666; }
+              .signature-line { width: 200px; border-top: 1px solid #000; margin-top: 5px; }
+              @media print { body { padding: 0; } .document { box-shadow: none; border: none; } }
+            </style>
+          </head>
+          <body>
+            <div class="document">
+              <div class="header">
+                <h1>ЗАЯВКА НА ПЕРЕВОЗКУ ГРУЗОВ</h1>
+                <div class="form-number">Форма ГУ-12</div>
+                <div class="date">Дата формирования: ${new Date().toLocaleDateString('ru-RU')}</div>
+              </div>
+              <div class="content">
+                ${printContent.innerHTML}
+                <div class="stamp">
+                  <div><div>М.П.</div><div class="signature-line"></div><div>Подпись отправителя</div></div>
+                  <div><div>М.П.</div><div class="signature-line"></div><div>Подпись перевозчика</div></div>
+                </div>
+              </div>
+              <div class="footer">Настоящий документ является официальным и имеет юридическую силу<br>Система электронного документооборота "Documentob Diplom"</div>
+            </div>
+            <script>window.onload = () => { window.print(); window.onafterprint = () => window.close(); };<\/script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+    setShowPrintModal(false);
+  };
 
   // Открытие модального окна перехода к накладной
   const handleOpenWaybillModal = () => {
@@ -150,7 +165,11 @@ export function ApplicationForm({ onBack, onLogout, onNavigateToWaybill }: Appli
 
   const handleConfirmWaybill = () => {
     setShowWaybillModal(false);
-    onNavigateToWaybill?.();
+    setShowWaybillForm(true);
+  };
+
+  const handleBackFromWaybill = () => {
+    setShowWaybillForm(false);
   };
 
   // Форматирование даты для отображения
@@ -223,31 +242,27 @@ export function ApplicationForm({ onBack, onLogout, onNavigateToWaybill }: Appli
     );
   };
 
+  // Если открыта страница накладной
+  if (showWaybillForm) {
+    return <WaybillFormPage onBack={handleBackFromWaybill} onLogout={onLogout} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
       
       {/* Скрытый блок для печати */}
-      <div className="hidden">
-        <div id="print-content">
-          <div className="bg-white p-6 font-serif">
-            <div className="text-center border-b-2 border-[#2860F0] pb-4 mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">{getSelectedDocName()}</h2>
-            </div>
-            <div className="space-y-3">
-              {currentFields.map((field) => (
-                <div key={field.key} className="flex py-2 border-b border-dashed border-gray-200">
-                  <div className="w-40 font-semibold text-gray-700">{field.label}:</div>
-                  <div className="flex-1 text-gray-800">
-                    {field.type === 'date' 
-                      ? formatDateForDisplay(formData[field.key] || '') 
-                      : formData[field.key] || '—'}
-                  </div>
-                </div>
-              ))}
+      <div className="hidden" id="print-content">
+        {currentFields.map((field) => (
+          <div key={field.key} className="info-row">
+            <div className="info-label">{field.label}:</div>
+            <div className="info-value">
+              {field.type === 'date' 
+                ? formatDateForDisplay(formData[field.key] || '') 
+                : formData[field.key] || '—'}
             </div>
           </div>
-        </div>
+        ))}
       </div>
       
       {/* Кнопки навигации */}
@@ -291,18 +306,8 @@ export function ApplicationForm({ onBack, onLogout, onNavigateToWaybill }: Appli
               <DocumentPreview />
             </div>
             <div className="bg-gray-50 px-6 py-4 flex gap-3 border-t border-gray-200">
-              <button
-                onClick={handlePrint}
-                className="flex-1 py-2 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors"
-              >
-                🖨️ Печать
-              </button>
-              <button
-                onClick={handleClosePrintModal}
-                className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg transition-colors"
-              >
-                ✖️ Отмена
-              </button>
+              <button onClick={handlePrint} className="flex-1 py-2 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg">🖨️ Печать</button>
+              <button onClick={handleClosePrintModal} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg">✖️ Отмена</button>
             </div>
           </div>
         </div>
