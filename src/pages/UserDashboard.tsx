@@ -1,27 +1,23 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { ApplicationForm } from './ApplicationForm';
-import { Documents } from './Documents';  // <-- ЭТОТ ИМПОРТ НУЖЕН
+import { Documents } from './Documents';
 import { WaybillFormPage } from './WaybillFormPage';
+import { WaybillNewPage } from './WaybillNewPage';
 
 
 interface UserDashboardProps {
   userName: string;
   userId?: number;
   onLogout: () => void;
-  
 }
 
 export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps) {
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
-const [showWaybillForm, setShowWaybillForm] = useState(false);
+  const [showWaybillForm, setShowWaybillForm] = useState(false);
+  const [showWaybillNewPage, setShowWaybillNewPage] = useState(false);
 
-
-// В return, где проверяются страницы
-if (showWaybillForm) {
-  return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
-}
   // Функции для навигации
   const handleNavigateToApplication = () => {
     setCurrentPage('application');
@@ -47,21 +43,28 @@ if (showWaybillForm) {
     console.log('Переход на страницу печатных форм');
   };
 
-
+  const handleNavigateToWaybillNew = () => {
+    setShowWaybillNewPage(true);
+  };
 
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
   };
- 
+
+  // ========== ПРОВЕРКИ СТРАНИЦ ==========
+  if (showWaybillNewPage) {
+    return <WaybillNewPage onBack={() => setShowWaybillNewPage(false)} onLogout={onLogout} />;
+  }
+
   if (showWaybillForm) {
     return <WaybillFormPage onBack={() => setShowWaybillForm(false)} onLogout={onLogout} />;
   }
-  // Проверка страниц
+
   if (currentPage === 'application') {
     return <ApplicationForm onBack={handleBackToDashboard} onLogout={onLogout} />;
   }
 
-   if (currentPage === 'myDocuments') {
+  if (currentPage === 'myDocuments') {
     return (
       <Documents
         userName={userName}
@@ -69,8 +72,6 @@ if (showWaybillForm) {
         userRole="user"
         onBack={handleBackToDashboard}
         onLogout={onLogout}
-      
-        
       />
     );
   }
@@ -118,7 +119,7 @@ if (showWaybillForm) {
       defaultBorder: 'border-transparent',
       hoverBorder: 'border-2 border-[#7C5CFC]',
       row: 1,
-      onClick: handleNavigateToWaybill,
+      onClick: handleNavigateToWaybillNew,  // ← исправлено
     },
     // Вторая строка
     {
@@ -163,12 +164,11 @@ if (showWaybillForm) {
       row: 2,
       onClick: handleNavigateToPrint,
     },
-   
   ];
 
   const firstRowButtons = buttons.filter(btn => btn.row === 1);
   const secondRowButtons = buttons.filter(btn => btn.row === 2);
- 
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -263,8 +263,6 @@ if (showWaybillForm) {
               );
             })}
           </div>
-
-         
         </div>
       </div>
 
