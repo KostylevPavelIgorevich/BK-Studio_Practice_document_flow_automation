@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { WaybillDetailsPage } from './WaybillDetailsPage';
+import { createWaybill } from '../services/api'; // ← добавить импорт
 
 interface WaybillNewPageProps {
   onBack: () => void;
@@ -12,6 +13,8 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
   const [waybillType, setWaybillType] = useState('');
   const [formType, setFormType] = useState('');
   const [showDetails, setShowDetails] = useState(false);
+  const [waybillId, setWaybillId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formTypeOptions = [
     'Повагонная',
@@ -25,13 +28,30 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
     { code: '94', name: 'Универсальный перевозочный документ на все виды отправок' },
   ];
 
-  const handleContinue = () => {
-    if (applicationType && waybillType && formType) {
+  const handleContinue = async () => {
+    if (!applicationType || !waybillType || !formType) {
+      alert('Пожалуйста, заполните все поля');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const newWaybill = await createWaybill({
+        application_type: applicationType,
+        waybill_type: waybillType,
+        form_type: formType,
+      });
+      setWaybillId(newWaybill.id);
       setShowDetails(true);
+    } catch (error) {
+      console.error('Ошибка создания накладной:', error);
+      alert('Ошибка при создании накладной');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (showDetails) {
+  if (showDetails && waybillId) {
     return (
       <WaybillDetailsPage
         onBack={() => setShowDetails(false)}
@@ -39,6 +59,7 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
         applicationType={applicationType}
         waybillType={waybillType}
         formType={formType}
+        waybillId={waybillId}
       />
     );
   }
@@ -62,14 +83,13 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
         </button>
       </div>
 
-      <div className="pt-20 px-6 pb-6">
+<div className="pt-[40px] px-6 pb-6">
         <div className="w-full">
           <div className="bg-[#7C5CFC] py-4 px-6 rounded-t-lg w-full">
             <h1 className="text-xl font-bold text-white">Оформление накладной на перевозку груза</h1>
           </div>
 
           <div className="bg-white rounded-b-lg shadow-lg p-6 space-y-5 w-full">
-            {/* Вариант оформления */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Вариант оформления</label>
               <select
@@ -83,7 +103,6 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
               </select>
             </div>
 
-            {/* Тип накладной */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Тип накладной</label>
               <select
@@ -98,7 +117,6 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
               </select>
             </div>
 
-            {/* Форма накладной */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Форма накладной</label>
               <select
@@ -117,10 +135,10 @@ export function WaybillNewPage({ onBack, onLogout }: WaybillNewPageProps) {
           <div className="flex justify-end mt-6">
             <button
               onClick={handleContinue}
-              disabled={!applicationType || !waybillType || !formType}
+              disabled={!applicationType || !waybillType || !formType || isLoading}
               className="px-8 py-3 bg-[#4475F7] hover:bg-[#3662d9] disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
             >
-              Продолжить
+              {isLoading ? 'Создание...' : 'Продолжить'}
             </button>
           </div>
         </div>

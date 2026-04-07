@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Требование на перемещение порожнего вагона ГУ-27</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; background: white; padding: 40px; }
+        .document { max-width: 800px; margin: 0 auto; border: 1px solid #e0e0e0; }
+        .header { text-align: center; padding: 30px; border-bottom: 2px solid #2860F0; }
+        .header h1 { font-size: 24px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .header .form-number { font-size: 14px; color: #666; margin-top: 5px; }
+        .content { padding: 30px; }
+        .field-row { display: flex; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #ccc; }
+        .field-label { width: 220px; font-weight: 600; }
+        .field-value { flex: 1; }
+        .signature-line { width: 200px; border-top: 1px solid #000; margin-top: 5px; }
+        .stamp { margin-top: 30px; display: flex; justify-content: space-between; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 11px; color: #999; }
+        @media print { body { padding: 0; } .document { box-shadow: none; border: none; } }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>ТРЕБОВАНИЕ НА ПЕРЕМЕЩЕНИЕ ПОРОЖНЕГО ВАГОНА</h1>
+            <div class="form-number">Форма ГУ-27</div>
+            <div class="date">Дата формирования: {{ current_date }}</div>
+        </div>
+        <div class="content">
+            <div class="field-row">
+                <div class="field-label">Номер документа:</div>
+                <div class="field-value">{{ document_number }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Номер вагона:</div>
+                <div class="field-value">{{ wagon_number }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Род вагона:</div>
+                <div class="field-value">{{ wagon_type }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Грузоподъемность (тонн):</div>
+                <div class="field-value">{{ load_capacity }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Станция отправления:</div>
+                <div class="field-value">{{ departure_station }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Станция прибытия:</div>
+                <div class="field-value">{{ arrival_station }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Расстояние (км):</div>
+                <div class="field-value">{{ distance }}</div>
+            </div>
+            
+            <div class="stamp">
+                <div>
+                    <div>М.П.</div>
+                    <div class="signature-line"></div>
+                    <div>Подпись отправителя</div>
+                </div>
+                <div>
+                    <div>М.П.</div>
+                    <div class="signature-line"></div>
+                    <div>Подпись перевозчика</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">Система электронного документооборота "Documentob Diplom"</div>
+    </div>
+</body>
+</html>

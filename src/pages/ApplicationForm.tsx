@@ -1,86 +1,117 @@
 import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '../components/Navbar';
 import { WaybillFormPage } from './WaybillFormPage';
+import { createDocument, getDocumentTypes, getDocumentTypeFields } from '../services/api';
 
 interface ApplicationFormProps {
   onBack: () => void;
   onLogout: () => void;
 }
 
-// Типы документов
-const documentTypes = [
-  { id: 'gu12', name: 'Заявка на перевозку грузов ГУ-12' },
-  { id: 'gu13', name: 'Распоряжение о внутрихозяйственных перевозках ГУ-13' },
-  { id: 'gu27', name: 'Требование на перемещение порожнего вагона ГУ-27' },
-  { id: 'gu45', name: 'Памятка приемосдатчика ГУ-45' },
-];
+interface DocumentType {
+  id: number;
+  code: string;
+  name: string;
+  html_template: string;
+  fields_config: FieldConfig[];
+}
 
-// Конфигурация полей для каждого типа документа
-const fieldsConfig: Record<string, Array<{ key: string; label: string; type: string; placeholder?: string }>> = {
-  gu12: [
-    { key: 'registrationDate', label: 'Дата регистрации', type: 'date' },
-    { key: 'carrierName', label: 'Наименование перевозчика', type: 'text', placeholder: 'Введите наименование перевозчика' },
-    { key: 'stationDeparture', label: 'Станция отправления', type: 'text', placeholder: 'Введите станцию отправления' },
-    { key: 'destinationStation', label: 'Станция назначения', type: 'text', placeholder: 'Введите станцию назначения' },
-    { key: 'cargoName', label: 'Наименование груза', type: 'text', placeholder: 'Введите наименование груза' },
-    { key: 'weight', label: 'Вес груза (тонн)', type: 'number', placeholder: '0' },
-    { key: 'wagonCount', label: 'Количество вагонов', type: 'number', placeholder: '0' },
-  ],
-  gu13: [
-    { key: 'orderNumber', label: 'Номер распоряжения', type: 'text', placeholder: 'Введите номер' },
-    { key: 'orderDate', label: 'Дата распоряжения', type: 'date' },
-    { key: 'sender', label: 'Отправитель', type: 'text', placeholder: 'Введите отправителя' },
-    { key: 'receiver', label: 'Получатель', type: 'text', placeholder: 'Введите получателя' },
-    { key: 'cargoName', label: 'Наименование груза', type: 'text', placeholder: 'Введите наименование груза' },
-  ],
-  gu27: [
-    { key: 'wagonNumber', label: 'Номер вагона', type: 'text', placeholder: 'Введите номер вагона' },
-    { key: 'wagonType', label: 'Род вагона', type: 'text', placeholder: 'Введите род вагона' },
-    { key: 'loadCapacity', label: 'Грузоподъемность', type: 'number', placeholder: '0' },
-    { key: 'departureStation', label: 'Станция отправления', type: 'text', placeholder: 'Введите станцию отправления' },
-    { key: 'arrivalStation', label: 'Станция прибытия', type: 'text', placeholder: 'Введите станцию прибытия' },
-    { key: 'distance', label: 'Расстояние (км)', type: 'number', placeholder: '0' },
-  ],
-  gu45: [
-    { key: 'documentNumber', label: 'Номер документа', type: 'text', placeholder: 'Введите номер' },
-    { key: 'documentDate', label: 'Дата документа', type: 'date' },
-    { key: 'senderName', label: 'Наименование отправителя', type: 'text', placeholder: 'Введите отправителя' },
-    { key: 'receiverName', label: 'Наименование получателя', type: 'text', placeholder: 'Введите получателя' },
-    { key: 'cargoDescription', label: 'Описание груза', type: 'textarea', placeholder: 'Введите описание груза' },
-  ],
-};
+interface FieldConfig {
+  key: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+}
 
 export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
   // Состояния
-  const [selectedDocType, setSelectedDocType] = useState('gu12');
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+  const [selectedDocType, setSelectedDocType] = useState<string>('');
+  const [fieldsConfig, setFieldsConfig] = useState<FieldConfig[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [showNotification, setShowNotification] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showWaybillModal, setShowWaybillModal] = useState(false);
   const [showWaybillForm, setShowWaybillForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Загрузка сохранённых данных
+  // Загрузка типов документов при монтировании
   useEffect(() => {
-    const saved = localStorage.getItem('applicationForm');
-    if (saved) {
-      const data = JSON.parse(saved);
-      setSelectedDocType(data.selectedDocType || 'gu12');
-      setFormData(data.formData || {});
-    }
+    loadDocumentTypes();
   }, []);
 
+  const loadDocumentTypes = async () => {
+    try {
+      setIsLoading(true);
+      const types = await getDocumentTypes();
+      setDocumentTypes(types);
+      
+      // Если есть типы, выбираем первый по умолчанию
+      if (types.length > 0) {
+        setSelectedDocType(types[0].code);
+        await loadFields(types[0].code);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки типов документов:', error);
+      alert('Ошибка загрузки списка документов');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Загрузка полей для выбранного типа документа
+const loadFields = async (docTypeCode: string) => {
+  try {
+    const fields = await getDocumentTypeFields(docTypeCode);
+    console.log('Загружены поля:', fields); // Добавьте для отладки
+    setFieldsConfig(fields);
+    setFormData({});
+  } catch (error) {
+    console.error('Ошибка загрузки полей документа:', error);
+    setFieldsConfig([]);
+  }
+};
+
+  // Обработчик смены типа документа
+  const handleDocTypeChange = async (docTypeCode: string) => {
+    setSelectedDocType(docTypeCode);
+    await loadFields(docTypeCode);
+  };
+
   // Сохранение данных
-  const handleSave = () => {
-    const saveData = {
-      selectedDocType,
-      formData,
-    };
-    localStorage.setItem('applicationForm', JSON.stringify(saveData));
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
-    console.log('Сохранено:', saveData);
+  const handleSave = async () => {
+    // Валидация обязательных полей
+    const missingFields: string[] = [];
+    for (const field of fieldsConfig) {
+      if (field.required && !formData[field.key]) {
+        missingFields.push(field.label);
+      }
+    }
+    
+    if (missingFields.length > 0) {
+      alert(`Заполните обязательные поля:\n${missingFields.join('\n')}`);
+      return;
+    }
+    
+    try {
+      // Находим ID типа документа
+      const docType = documentTypes.find(d => d.code === selectedDocType);
+      if (!docType) {
+        alert('Тип документа не найден');
+        return;
+      }
+      
+      const document = await createDocument(docType.id, formData);
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+      console.log('Сохранено в БД:', document);
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      alert('Ошибка при сохранении документа');
+    }
   };
 
   // Обработчик изменения полей
@@ -102,13 +133,16 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
     const printContent = document.getElementById('print-content');
     if (!printContent) return;
     
+    const currentDocType = documentTypes.find(d => d.code === selectedDocType);
+    const docName = currentDocType?.name || 'Документ';
+    
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Документ</title>
+            <title>${docName}</title>
             <meta charset="UTF-8">
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -132,8 +166,7 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
           <body>
             <div class="document">
               <div class="header">
-                <h1>ЗАЯВКА НА ПЕРЕВОЗКУ ГРУЗОВ</h1>
-                <div class="form-number">Форма ГУ-12</div>
+                <h1>${docName}</h1>
                 <div class="date">Дата формирования: ${new Date().toLocaleDateString('ru-RU')}</div>
               </div>
               <div class="content">
@@ -184,12 +217,65 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
 
   // Получение названия выбранного документа
   const getSelectedDocName = () => {
-    const doc = documentTypes.find(d => d.id === selectedDocType);
+    const doc = documentTypes.find(d => d.code === selectedDocType);
     return doc?.name || 'Документ';
   };
 
-  // Получение полей для текущего типа документа
-  const currentFields = fieldsConfig[selectedDocType] || [];
+  // Рендер поля в зависимости от типа
+const renderField = (field: FieldConfig) => {
+  const value = formData[field.key] || '';
+  
+  switch (field.type) {
+    case 'textarea':
+      return (
+        <textarea
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          placeholder={field.placeholder || `Введите ${field.label.toLowerCase()}`}
+          rows={3}
+          className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+        />
+      );
+    case 'date':
+      return (
+        <input
+          type="date"
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+        />
+      );
+    case 'datetime-local':
+      return (
+        <input
+          type="datetime-local"
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+        />
+      );
+    case 'number':
+      return (
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          placeholder={field.placeholder || '0'}
+          className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+        />
+      );
+    default:
+      return (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          placeholder={field.placeholder || `Введите ${field.label.toLowerCase()}`}
+          className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+        />
+      );
+  }
+};
 
   // Компонент предварительного просмотра
   const DocumentPreview = () => {
@@ -202,20 +288,26 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
         </div>
         
         <div className="space-y-3">
-          {currentFields.map((field) => (
+          {fieldsConfig.map((field) => (
             <div key={field.key} className="flex py-2 border-b border-dashed border-gray-200">
               <div className="w-40 font-semibold text-gray-700">{field.label}:</div>
               <div className="flex-1 text-gray-800">
-                {field.type === 'date' 
-                  ? formatDateForDisplay(formData[field.key] || '') 
-                  : formData[field.key] || '—'}
+                {field.type === 'date' || field.type === 'datetime-local'
+                  ? (formData[field.key] ? formatDateForDisplay(formData[field.key]) : '—')
+                  : (formData[field.key] || '—')}
               </div>
             </div>
           ))}
           
-          {currentFields.length === 0 && (
+          {fieldsConfig.length === 0 && !isLoading && (
             <div className="text-center text-gray-400 py-4">
               Выберите тип документа
+            </div>
+          )}
+          
+          {isLoading && (
+            <div className="text-center text-gray-400 py-4">
+              Загрузка...
             </div>
           )}
         </div>
@@ -247,19 +339,31 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
     return <WaybillFormPage onBack={handleBackFromWaybill} onLogout={onLogout} />;
   }
 
+  // Показываем загрузку
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#E4E9F8] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#2860F0] mb-4"></div>
+          <p className="text-gray-600">Загрузка форм документов...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
       
       {/* Скрытый блок для печати */}
       <div className="hidden" id="print-content">
-        {currentFields.map((field) => (
+        {fieldsConfig.map((field) => (
           <div key={field.key} className="info-row">
             <div className="info-label">{field.label}:</div>
             <div className="info-value">
-              {field.type === 'date' 
-                ? formatDateForDisplay(formData[field.key] || '') 
-                : formData[field.key] || '—'}
+              {field.type === 'date' || field.type === 'datetime-local'
+                ? (formData[field.key] ? formatDateForDisplay(formData[field.key]) : '—')
+                : (formData[field.key] || '—')}
             </div>
           </div>
         ))}
@@ -345,43 +449,29 @@ export function ApplicationForm({ onBack, onLogout }: ApplicationFormProps) {
           <div className="space-y-4">
             {/* Выбор типа документа */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Тип документа</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Тип документа *</label>
               <select
                 value={selectedDocType}
-                onChange={(e) => setSelectedDocType(e.target.value)}
+                onChange={(e) => handleDocTypeChange(e.target.value)}
                 className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
               >
                 {documentTypes.map(doc => (
-                  <option key={doc.id} value={doc.id}>{doc.name}</option>
+                  <option key={doc.id} value={doc.code}>{doc.name}</option>
                 ))}
               </select>
             </div>
             
             {/* Динамические поля в зависимости от выбранного типа документа */}
-            {currentFields.map((field) => (
+            {fieldsConfig.map((field) => (
               <div key={field.key}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                {field.type === 'textarea' ? (
-                  <textarea
-                    value={formData[field.key] || ''}
-                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                    placeholder={field.placeholder}
-                    rows={3}
-                    className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
-                  />
-                ) : (
-                  <input
-                    type={field.type}
-                    value={formData[field.key] || ''}
-                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                    placeholder={field.placeholder}
-                    className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
-                  />
-                )}
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </label>
+                {renderField(field)}
               </div>
             ))}
             
-            {currentFields.length === 0 && (
+            {fieldsConfig.length === 0 && !isLoading && (
               <div className="text-center text-gray-400 py-4">
                 Выберите тип документа
               </div>

@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
+import { saveWaybillData, printWaybill } from '../services/api'; // ← импортируем API
 
 interface WaybillDetailsPageProps {
   onBack: () => void;
@@ -7,11 +8,21 @@ interface WaybillDetailsPageProps {
   applicationType: string;
   waybillType: string;
   formType: string;
+  waybillId: number; // ← добавляем ID накладной (передаётся из WaybillNewPage)
 }
 
-export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillType, formType }: WaybillDetailsPageProps) {
+export function WaybillDetailsPage({ 
+  onBack, 
+  onLogout, 
+  applicationType, 
+  waybillType, 
+  formType,
+  waybillId 
+}: WaybillDetailsPageProps) {
   const [selectedSection, setSelectedSection] = useState('Сведения о вагоне');
   const [showNotification, setShowNotification] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   
   // Данные для полей
@@ -43,67 +54,80 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
     'Сведения о перевозке',
   ];
 
-  // Сохранение данных
-  const handleSave = () => {
-    const saveData = {
-      wagonData,
-      senderData,
-      receiverData,
-      transportData,
-      formType,
-      applicationType,
-      waybillType,
+  // ========== ЗАГРУЗКА СОХРАНЁННЫХ ДАННЫХ (если есть) ==========
+  useEffect(() => {
+    // Здесь можно загрузить ранее сохранённые данные для этой накладной
+    // GET /waybill/{id}
+    const loadSavedData = async () => {
+      try {
+        // const data = await getWaybillData(waybillId);
+        // если есть данные, заполнить состояния
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+      }
     };
-    localStorage.setItem('waybillData', JSON.stringify(saveData));
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
-    console.log('Сохранено:', saveData);
-  };
+    loadSavedData();
+  }, [waybillId]);
 
-  // Печать
-  const handlePrint = () => {
-    const printContent = document.getElementById('print-content');
-    if (!printContent) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Накладная</title>
-            <meta charset="UTF-8">
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { font-family: 'Times New Roman', serif; padding: 40px; }
-              .print-container { max-width: 800px; margin: 0 auto; }
-              .field-row { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed #ccc; display: flex; }
-              .field-label { width: 200px; font-weight: bold; }
-              .field-value { flex: 1; }
-              h1 { text-align: center; border-bottom: 2px solid #2860F0; padding-bottom: 10px; margin-bottom: 20px; }
-              @media print { body { padding: 20px; } }
-            </style>
-          </head>
-          <body>
-            <div class="print-container">
-              <h1>НАКЛАДНАЯ НА ПЕРЕВОЗКУ ГРУЗА</h1>
-              ${printContent.innerHTML}
-            </div>
-            <script>window.onload = () => { window.print(); window.close(); };</script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+  // ========== СОХРАНЕНИЕ ДАННЫХ ==========
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const saveData = {
+        wagonData,
+        senderData,
+        receiverData,
+        transportData,
+        formType,
+        applicationType,
+        waybillType,
+      };
+      
+      // Отправляем данные на сервер
+      await saveWaybillData(waybillId, saveData);
+      
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+      console.log('Сохранено в БД:', saveData);
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      alert('Ошибка при сохранении данных');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // В накладную
-  const handleToWaybill = () => {
-    console.log('Переход к накладной');
-    // Здесь будет логика перехода
+  // ========== ПЕЧАТЬ ==========
+  const handlePrint = async () => {
+    setIsPrinting(true);
+    try {
+      // Получаем HTML для печати от сервера
+      const { html } = await printWaybill(waybillId);
+      
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.print();
+          printWindow.onafterprint = () => printWindow.close();
+        };
+      }
+    } catch (error) {
+      console.error('Ошибка печати:', error);
+      alert('Ошибка при печати документа');
+    } finally {
+      setIsPrinting(false);
+    }
   };
 
-  // Рендер полей в зависимости от выбранной секции
+  // ========== В НАКЛАДНУЮ (заглушка) ==========
+  const handleToWaybill = () => {
+    console.log('Переход к накладной');
+    // Здесь будет логика перехода (если нужно)
+  };
+
+  // ========== РЕНДЕР ПОЛЕЙ ==========
   const renderFields = () => {
     switch (selectedSection) {
       case 'Сведения о вагоне':
@@ -170,7 +194,7 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Расстояние (км)</label>
-              <input type="number" value={transportData.distance} onChange={(e) => setTransportData({...transportData, distance: e.target.value})} className="w-full px-4 py-2 bg-[#E4E0FF} border border-[#919191] rounded-lg text-gray-900" />
+              <input type="number" value={transportData.distance} onChange={(e) => setTransportData({...transportData, distance: e.target.value})} className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900" />
             </div>
           </div>
         );
@@ -179,7 +203,7 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
     }
   };
 
-  // Предпросмотр документа
+  // ========== ПРЕДПРОСМОТР ДОКУМЕНТА ==========
   const DocumentPreview = () => {
     let previewData: { label: string; value: string }[] = [];
     
@@ -215,7 +239,6 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
           <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">НАКЛАДНАЯ НА ПЕРЕВОЗКУ ГРУЗА</h2>
           <p className="text-gray-500 text-sm mt-1">{formType}</p>
         </div>
-        
         <div className="space-y-3">
           {previewData.map((item, idx) => (
             <div key={idx} className="flex py-2 border-b border-dashed border-gray-200">
@@ -224,7 +247,6 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
             </div>
           ))}
         </div>
-        
         <div className="mt-6 pt-4 border-t border-gray-200 text-center">
           <div className="flex justify-between px-4">
             <div className="text-center">
@@ -243,6 +265,7 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
     );
   };
 
+  // ========== ОСНОВНОЙ РЕНДЕР ==========
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
@@ -309,21 +332,19 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
           <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
             Заполнение данных
           </h2>
-          
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Сведения</label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none"
               >
                 {sectionOptions.map(opt => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
             </div>
-            
             {renderFields()}
           </div>
         </div>
@@ -342,15 +363,17 @@ export function WaybillDetailsPage({ onBack, onLogout, applicationType, waybillT
           <div className="flex gap-4 mt-4">
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-[#4475F7] hover:bg-[#3662d9] text-white font-medium rounded-lg transition-colors"
+              disabled={isSaving}
+              className="flex-1 py-3 bg-[#4475F7] hover:bg-[#3662d9] disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
             >
-              💾 Сохранить
+              {isSaving ? 'Сохранение...' : '💾 Сохранить'}
             </button>
             <button
               onClick={handlePrint}
-              className="flex-1 py-3 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg transition-colors"
+              disabled={isPrinting}
+              className="flex-1 py-3 bg-[#2860F0] hover:bg-[#1e4bc2] disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
             >
-              🖨️ Печать
+              {isPrinting ? 'Подготовка...' : '🖨️ Печать'}
             </button>
             <button
               onClick={handleToWaybill}

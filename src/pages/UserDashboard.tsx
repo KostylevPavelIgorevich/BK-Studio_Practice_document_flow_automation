@@ -5,7 +5,6 @@ import { Documents } from './Documents';
 import { WaybillFormPage } from './WaybillFormPage';
 import { WaybillNewPage } from './WaybillNewPage';
 
-
 interface UserDashboardProps {
   userName: string;
   userId?: number;
@@ -40,7 +39,7 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
   };
 
   const handleNavigateToPrint = () => {
-    console.log('Переход на страницу печатных форм');
+    setCurrentPage('myDocuments');   // ← Теперь работает
   };
 
   const handleNavigateToWaybillNew = () => {
@@ -119,7 +118,7 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
       defaultBorder: 'border-transparent',
       hoverBorder: 'border-2 border-[#7C5CFC]',
       row: 1,
-      onClick: handleNavigateToWaybillNew,  // ← исправлено
+      onClick: handleNavigateToWaybillNew,
     },
     // Вторая строка
     {
@@ -162,7 +161,7 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
       defaultBorder: 'border-transparent',
       hoverBorder: 'border-2 border-[#2860F0]',
       row: 2,
-      onClick: handleNavigateToPrint,
+      onClick: handleNavigateToPrint,   // ← Главное изменение
     },
   ];
 
