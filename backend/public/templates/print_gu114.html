@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Печатная форма (ГУ-114)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', 'Georgia', serif; background: white; padding: 40px; }
+        .document { max-width: 800px; margin: 0 auto; background: white; border: 2px solid #E36756; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { text-align: center; padding: 30px; border-bottom: 2px solid #E36756; background: #fff0ee; border-radius: 8px 8px 0 0; }
+        .header h1 { font-size: 24px; color: #E36756; text-transform: uppercase; }
+        .header .date { font-size: 12px; color: #999; margin-top: 10px; }
+        .content { padding: 30px; background: #fff; }
+        .field-row { display: flex; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #ffe0e0; }
+        .field-label { width: 200px; font-weight: 600; color: #c0392b; }
+        .field-value { flex: 1; color: #1a2c3e; }
+        .stamp { margin-top: 30px; display: flex; justify-content: space-between; }
+        .signature-line { width: 200px; border-top: 2px solid #E36756; margin-top: 5px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 11px; color: #999; }
+        @media print { body { padding: 0; } .document { box-shadow: none; } }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>ЗАЯВКА НА ПЕРЕВОЗКУ ГРУЗОВ (АЛЬТЕРНАТИВНАЯ)</h1>
+            <div class="date">Дата формирования: {{ current_date }}</div>
+        </div>
+        <div class="content">
+            <div class="field-row"><div class="field-label">Номер заявки:</div><div class="field-value">{{ bid_number }}</div></div>
+            <div class="field-row"><div class="field-label">Дата регистрации:</div><div class="field-value">{{ registration_date }}</div></div>
+            <div class="field-row"><div class="field-label">Дата согласования:</div><div class="field-value">{{ agreement_date }}</div></div>
+            <div class="field-row"><div class="field-label">Перевозчик:</div><div class="field-value">{{ carrier_name }}</div></div>
+            <div class="field-row"><div class="field-label">Станция отправления:</div><div class="field-value">{{ departure_station }}</div></div>
+            <div class="field-row"><div class="field-label">Станция назначения:</div><div class="field-value">{{ destination_station }}</div></div>
+            <div class="field-row"><div class="field-label">Наименование груза:</div><div class="field-value">{{ cargo_name }}</div></div>
+            <div class="field-row"><div class="field-label">Вес груза (тонн):</div><div class="field-value">{{ weight }}</div></div>
+            <div class="field-row"><div class="field-label">Количество вагонов:</div><div class="field-value">{{ wagon_count }}</div></div>
+            <div class="stamp">
+                <div><div>М.П.</div><div class="signature-line"></div><div>Подпись отправителя</div><div>{{ sender_signature }}</div></div>
+                <div><div>М.П.</div><div class="signature-line"></div><div>Подпись перевозчика</div><div>{{ carrier_signature }}</div></div>
+            </div>
+        </div>
+        <div class="footer">Альтернативная печатная форма<br>Система электронного документооборота "Documentob Diplom"</div>
+    </div>
+</body>
+</html>

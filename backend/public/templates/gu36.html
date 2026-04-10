@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Уведомление о прибытии ГУ-36</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; background: white; padding: 40px; }
+        .document { max-width: 800px; margin: 0 auto; border: 1px solid #e0e0e0; }
+        .header { text-align: center; padding: 30px; border-bottom: 2px solid #2860F0; }
+        .header h1 { font-size: 24px; margin-bottom: 8px; text-transform: uppercase; }
+        .content { padding: 30px; }
+        .field-row { display: flex; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #ccc; }
+        .field-label { width: 220px; font-weight: 600; }
+        .field-value { flex: 1; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 11px; }
+        @media print { body { padding: 0; } .document { box-shadow: none; border: none; } }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>Уведомление о прибытии {{ cargo_type }}а № {{ notification_number }}</h1>
+        </div>
+        <div class="content">
+            <div class="field-row">
+                <div class="field-label">Получатель:</div>
+                <div class="field-value">{{ receiver }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Дата прибытия:</div>
+                <div class="field-value">{{ arrival_date }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Станция прибытия:</div>
+                <div class="field-value">{{ arrival_station }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Номер поезда:</div>
+                <div class="field-value">{{ train_number }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Номер квитанции:</div>
+                <div class="field-value">{{ waybill_number }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Дата квитанции:</div>
+                <div class="field-value">{{ receipt_date }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Отправитель:</div>
+                <div class="field-value">{{ sender }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Станция отправления:</div>
+                <div class="field-value">{{ departure_station }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Время хранения:</div>
+                <div class="field-value">{{ storage_hours }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Адрес хранения:</div>
+                <div class="field-value">{{ storage_address }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Должность представителя:</div>
+                <div class="field-value">{{ agent_position }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">ФИО представителя:</div>
+                <div class="field-value">{{ agent_name }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Дата и время уведомления:</div>
+                <div class="field-value">{{ notification_datetime }}</div>
+            </div>
+        </div>
+        <div class="footer">
+            Система электронного документооборота "Documento Diplom"
+        </div>
+    </div>
+</body>
+</html>

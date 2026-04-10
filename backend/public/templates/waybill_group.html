@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Накладная на перевозку груза (групповая)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', 'Georgia', serif; background: white; padding: 40px; margin: 0; }
+        .document { max-width: 800px; margin: 0 auto; background: white; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { text-align: center; padding: 30px 30px 20px; border-bottom: 2px solid #2860F0; }
+        .header h1 { font-size: 24px; font-weight: bold; color: #1a2c3e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .header .form-number { font-size: 14px; color: #666; margin-top: 5px; }
+        .header .date { font-size: 12px; color: #999; margin-top: 10px; }
+        .content { padding: 30px; }
+        .section { margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; }
+        .section-title { font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; background: #f5f5f5; padding: 5px; margin: -15px -15px 15px -15px; }
+        .field-row { display: flex; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #e0e0e0; }
+        .field-label { width: 220px; font-weight: 600; color: #2c3e50; font-size: 14px; }
+        .field-value { flex: 1; color: #1a2c3e; font-size: 14px; }
+        .wagon-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .wagon-table th, .wagon-table td { border: 1px solid #000; padding: 8px; text-align: center; }
+        .wagon-table th { background: #f5f5f5; }
+        .stamp { margin-top: 30px; display: flex; justify-content: space-between; padding: 0 20px; }
+        .stamp div { text-align: center; font-size: 12px; color: #666; }
+        .signature-line { width: 200px; border-top: 1px solid #000; margin-top: 5px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 11px; color: #999; }
+        @media print { body { padding: 0; } .document { box-shadow: none; border: none; } }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>ГРУППОВАЯ НАКЛАДНАЯ</h1>
+            <div class="form-number">на перевозку груза группой вагонов</div>
+            <div class="date">Дата оформления: {{ date }}</div>
+            <div class="form-number" style="margin-top:5px;">Вариант оформления: {{ option_name }} | Тип накладной: {{ waybill_type_name }}</div>
+        </div>
+        <div class="content">
+            <div class="section">
+                <div class="section-title">Отправитель и получатель</div>
+                <div class="field-row"><div class="field-label">Грузоотправитель:</div><div class="field-value">{{ sender_name }}</div></div>
+                <div class="field-row"><div class="field-label">Код ОКПО:</div><div class="field-value">{{ sender_okpo }}</div></div>
+                <div class="field-row"><div class="field-label">Грузополучатель:</div><div class="field-value">{{ receiver_name }}</div></div>
+                <div class="field-row"><div class="field-label">Код ОКПО:</div><div class="field-value">{{ receiver_okpo }}</div></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Маршрут</div>
+                <div class="field-row"><div class="field-label">Станция отправления:</div><div class="field-value">{{ departure_station }} (код: {{ departure_station_code }})</div></div>
+                <div class="field-row"><div class="field-label">Станция назначения:</div><div class="field-value">{{ arrival_station }} (код: {{ arrival_station_code }})</div></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Сведения о грузе</div>
+                <div class="field-row"><div class="field-label">Наименование груза:</div><div class="field-value">{{ cargo_name }}</div></div>
+                <div class="field-row"><div class="field-label">Код груза (ЕТСНГ):</div><div class="field-value">{{ cargo_code }}</div></div>
+                <div class="field-row"><div class="field-label">Общий вес (кг):</div><div class="field-value">{{ weight }}</div></div>
+                <div class="field-row"><div class="field-label">Количество мест:</div><div class="field-value">{{ places_count }}</div></div>
+                <div class="field-row"><div class="field-label">Род упаковки:</div><div class="field-value">{{ packaging_type }}</div></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Список вагонов</div>
+                <div class="field-row"><div class="field-label">Количество вагонов:</div><div class="field-value">{{ wagon_count }}</div></div>
+                <div class="field-row"><div class="field-label">Номера вагонов:</div><div class="field-value">{{ wagon_numbers }}</div></div>
+                <div class="field-row"><div class="field-label">Общий вес груза (кг):</div><div class="field-value">{{ total_weight }}</div></div>
+            </div>
+
+            {{#if application_number}}
+            <div class="section">
+                <div class="section-title">Сведения о заявке ГУ-12</div>
+                <div class="field-row"><div class="field-label">Номер заявки:</div><div class="field-value">{{ application_number }}</div></div>
+                <div class="field-row"><div class="field-label">Дата согласования заявки:</div><div class="field-value">{{ agreement_date }}</div></div>
+            </div>
+            {{/if}}
+
+            <div class="section">
+                <div class="section-title">Платежи</div>
+                <div class="field-row"><div class="field-label">Код плательщика:</div><div class="field-value">{{ payer_code }}</div></div>
+                <div class="field-row"><div class="field-label">Сумма провозной платы (руб.):</div><div class="field-value">{{ payment_amount }}</div></div>
+                <div class="field-row"><div class="field-label">Номер договора:</div><div class="field-value">{{ contract_number }}</div></div>
+            </div>
+
+            <div class="stamp">
+                <div><div>М.П.</div><div class="signature-line"></div><div>{{ signature_sender }}</div><div>Подпись отправителя</div></div>
+                <div><div>М.П.</div><div class="signature-line"></div><div>{{ signature_receiver }}</div><div>Подпись перевозчика</div></div>
+            </div>
+        </div>
+        <div class="footer">Система электронного документооборота "Documentob Diplom"</div>
+    </div>
+</body>
+</html>

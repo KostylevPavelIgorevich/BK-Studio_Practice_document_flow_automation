@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Накладная на перевозку груза</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; background: white; padding: 40px; }
+        .document { max-width: 800px; margin: 0 auto; border: 1px solid #e0e0e0; }
+        .header { text-align: center; padding: 30px; border-bottom: 2px solid #2860F0; }
+        .header h1 { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+        .content { padding: 30px; }
+        .field-row { display: flex; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #e0e0e0; }
+        .field-label { width: 220px; font-weight: 600; }
+        .field-value { flex: 1; }
+        .stamp { margin-top: 30px; display: flex; justify-content: space-between; }
+        .signature-line { width: 200px; border-top: 1px solid #000; margin-top: 5px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 11px; color: #999; }
+        @media print { body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>НАКЛАДНАЯ НА ПЕРЕВОЗКУ ГРУЗА</h1>
+            <div class="date">Дата оформления: {{ date }}</div>
+            <div class="form-number">Вариант оформления: {{ option_name }} | Тип накладной: {{ waybill_type_name }}</div>
+        </div>
+        <div class="content">
+            <!-- Универсальные поля, будут заполняться динамически -->
+            {{#each fields}}
+            <div class="field-row">
+                <div class="field-label">{{ this.label }}:</div>
+                <div class="field-value">{{ this.value }}</div>
+            </div>
+            {{/each}}
+            <div class="stamp">
+                <div><div>М.П.</div><div class="signature-line"></div><div>Подпись отправителя: {{ signature_sender }}</div></div>
+                <div><div>М.П.</div><div class="signature-line"></div><div>Подпись перевозчика: {{ signature_receiver }}</div></div>
+            </div>
+        </div>
+        <div class="footer">Система электронного документооборота "Documentob Diplom"</div>
+    </div>
+</body>
+</html>
