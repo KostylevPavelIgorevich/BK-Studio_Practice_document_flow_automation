@@ -14,7 +14,7 @@ interface DocumentsProps {
 interface DocumentType {
   id: number;
   name: string;
-  fields_config: any[]; // массив полей { key, label, type, ... }
+  fields_config: any[];
 }
 
 export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps) {
@@ -26,12 +26,18 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
   const [isLoading, setIsLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState<Map<number, DocumentType>>(new Map());
 
-  // Загрузка типов документов из БД
   const loadDocumentTypes = async () => {
     try {
       const types = await getDocumentTypes();
       const map = new Map<number, DocumentType>();
-      types.forEach((type: any) => map.set(type.id, type));
+      types.forEach((type: any) => {
+        let fieldsConfig = type.fields_config;
+        if (typeof fieldsConfig === 'string') {
+          try { fieldsConfig = JSON.parse(fieldsConfig); } catch(e) { fieldsConfig = []; }
+        }
+        if (!Array.isArray(fieldsConfig)) fieldsConfig = [];
+        map.set(type.id, { ...type, fields_config: fieldsConfig });
+      });
       setDocumentTypes(map);
     } catch (error) {
       console.error('Ошибка загрузки типов документов:', error);
@@ -65,17 +71,16 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
     }
   }, [userId]);
 
-  // Получение названия типа документа по ID
   const getTypeName = (typeId: number): string => {
     return documentTypes.get(typeId)?.name || 'Документ';
   };
 
-  // Получение конфигурации полей для типа
   const getFieldsConfig = (typeId: number): any[] => {
-    return documentTypes.get(typeId)?.fields_config || [];
+    const type = documentTypes.get(typeId);
+    if (!type) return [];
+    return Array.isArray(type.fields_config) ? type.fields_config : [];
   };
 
-  // Фильтрация и сортировка
   const filteredDocs = documents.filter(doc =>
     getTypeName(doc.typeId).toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -112,6 +117,7 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
     if (typeof formData === 'string') {
       try { formData = JSON.parse(formData); } catch(e) { formData = {}; }
     }
+    if (!formData || typeof formData !== 'object') formData = {};
     const fieldsConfig = getFieldsConfig(typeId);
     const filledFields = fieldsConfig.filter(field => {
       const value = formData[field.key];
@@ -232,11 +238,12 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
                       if (typeof formData === 'string') {
                         try { formData = JSON.parse(formData); } catch(e) { formData = {}; }
                       }
+                      if (!formData || typeof formData !== 'object') formData = {};
                       const fieldsConfig = getFieldsConfig(selectedDocument.document_type_id);
-                      const filledFields = fieldsConfig.filter(f => {
+                      const filledFields = Array.isArray(fieldsConfig) ? fieldsConfig.filter(f => {
                         const val = formData[f.key];
                         return val !== undefined && val !== null && val !== '';
-                      });
+                      }) : [];
                       if (filledFields.length === 0) return <div className="text-center text-gray-400 py-4">Нет данных</div>;
                       return filledFields.map(field => (
                         <div key={field.key} className="flex py-2 border-b border-[#C9D9FF] last:border-0">
