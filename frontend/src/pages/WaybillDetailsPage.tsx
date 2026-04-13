@@ -351,7 +351,7 @@ export function WaybillDetailsPage({
         
         {/* Правая колонка - предпросмотр */}
         <div className="w-1/2 flex flex-col">
-          <div className="bg-[#C9D9FF] py-2 px-4 rounded-t-lg">
+          <div className=" py-2 px-4 rounded-t-lg">
             <h3 className="font-semibold text-gray-800">Предварительный просмотр документа</h3>
             <p className="text-xs text-gray-600">Данные обновляются автоматически при вводе</p>
           </div>

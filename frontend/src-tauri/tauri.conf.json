@@ -5,13 +5,14 @@
   "identifier": "com.documentob.diplom",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://127.0.0.1:8080",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "documentob-diplom",
         "width": 800,
         "height": 600

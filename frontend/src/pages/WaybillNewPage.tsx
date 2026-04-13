@@ -1,4 +1,4 @@
-// pages/WaybillNewPage.tsx - полный файл с правильными стилями
+// pages/WaybillNewPage.tsx
 import { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { WaybillForm } from './WaybillForm';
@@ -19,6 +19,7 @@ interface WaybillNewPageProps {
 }
 
 interface Template {
+  id: number;           // ← добавить
   filename: string;
   name: string;
   type: string;
@@ -104,14 +105,11 @@ export function WaybillNewPage({
     try {
       const allDocs = await getDocuments();
       const userDocs = allDocs.filter((doc: any) => doc.user_id === userId);
-      
-      // Фильтруем заявки по типу ГУ-12 (id=1) или ГУ-13 (id=2)
       const filtered = userDocs.filter((doc: any) => {
         if (option === 'gu12' && doc.document_type_id === 1) return true;
         if (option === 'gu13' && doc.document_type_id === 2) return true;
         return false;
       });
-      
       setApplications(filtered);
     } catch (error) {
       console.error('Ошибка загрузки заявок:', error);
@@ -202,7 +200,6 @@ export function WaybillNewPage({
       alert('Выберите тип накладной');
       return;
     }
-    // Модальное окно уже открыто через handleOptionChangeForApplication
   };
 
   if (showForm && selectedTemplate) {
@@ -214,6 +211,7 @@ export function WaybillNewPage({
         option={option}
         type={waybillType}
         form={selectedFormType}
+        documentTypeId={selectedTemplate.id}   // ← передаём ID
         fieldsConfig={selectedTemplate.fields}
         htmlTemplate={selectedTemplate.html_content}
         initialData={initialFormData}
@@ -319,14 +317,12 @@ export function WaybillNewPage({
         </div>
       </div>
 
-      {/* Модальное окно для выбора заявки */}
       {showModal && fromApplication && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="w-[500px] rounded-2xl shadow-xl p-6" style={{ backgroundColor: '#6990F5', border: '1px solid #C9D9FF' }}>
             <div className="-mt-6 -mx-6 mb-4 px-6 py-3 rounded-t-2xl" style={{ backgroundColor: '#C9D9FF' }}>
               <h3 className="text-lg font-semibold text-center" style={{ color: '#2860F0' }}>Выбор заявки</h3>
             </div>
-            
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white mb-1">
@@ -359,7 +355,6 @@ export function WaybillNewPage({
                 )}
               </div>
             </div>
-            
             <div className="flex gap-3 mt-6">
               <button onClick={handleModalAccept} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg border border-white">Принять</button>
               <button onClick={handleModalCancel} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg border border-white">Отмена</button>

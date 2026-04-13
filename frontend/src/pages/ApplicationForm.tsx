@@ -13,6 +13,7 @@ interface ApplicationFormProps {
 }
 
 interface Template {
+  id: number;                 // ← добавлено
   filename: string;
   name: string;
   type: string;
@@ -28,7 +29,6 @@ interface FieldConfig {
   required: boolean;
 }
 
-// Данные для передачи в накладную
 interface WaybillTransferData {
   template: Template;
   formData: Record<string, any>;
@@ -49,12 +49,10 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
   const [selectedStyle, setSelectedStyle] = useState<'gu12' | 'gu114'>('gu12');
   const [waybillTransferData, setWaybillTransferData] = useState<WaybillTransferData | null>(null);
 
-  // Загрузка шаблонов заявок
   useEffect(() => {
     loadApplicationTemplates();
   }, []);
 
-  // Валидация в реальном времени
   useEffect(() => {
     if (selectedTemplate) {
       const errors: Record<string, string> = {};
@@ -105,7 +103,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     }
   };
 
-  // ========== ВАЛИДАЦИЯ ==========
   const validateField = (field: FieldConfig, value: any): string => {
     const strValue = String(value ?? '').trim();
     if (!strValue) return `Поле "${field.label}" обязательно для заполнения`;
@@ -136,7 +133,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     }
 
     if (strValue.length > 255) return `Поле "${field.label}" не может быть длиннее 255 символов`;
-
     return '';
   };
 
@@ -166,7 +162,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
 
   const hasErrors = Object.values(fieldErrors).some(error => error && error.length > 0);
 
-  // Сохранение заявки
   const handleSave = async () => {
     if (!selectedTemplate) {
       alert('Выберите тип заявки');
@@ -178,7 +173,7 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
       return;
     }
     try {
-      await createDocument(1, {
+      await createDocument(selectedTemplate.id, {
         ...formData,
         template_name: selectedTemplate.filename,
         document_type_name: selectedTemplate.name,
@@ -190,9 +185,9 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
       console.error('Ошибка сохранения:', error);
       alert('Ошибка при сохранении документа');
     }
+    console.log('selectedTemplate.id:', selectedTemplate?.id);
   };
 
-  // ========== ПЕЧАТЬ ==========
   const generatePrintHtml = (style: 'gu12' | 'gu114') => {
     if (!selectedTemplate) return '';
     const docName = selectedTemplate.name;
@@ -252,7 +247,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     setPrintStyleModalOpen(false);
   };
 
-  // ========== ПЕРЕХОД В НАКЛАДНУЮ ==========
   const canGoToWaybill = (template: Template | null): boolean => {
     if (!template) return false;
     const allowed = ['gu12', 'gu13'];
@@ -279,7 +273,7 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
       setWaybillTransferData({
         template: selectedTemplate,
         formData: formData,
-        option: 'gu12',       // по умолчанию, при желании можно вынести в выбор пользователя
+        option: 'gu12',
         waybillType: '90',
       });
     }
@@ -292,7 +286,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     setWaybillTransferData(null);
   };
 
-  // ========== РЕНДЕР ПОЛЯ ==========
   const renderField = (field: FieldConfig) => {
     const value = formData[field.key] || '';
     const error = fieldErrors[field.key];
@@ -342,7 +335,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     );
   };
 
-  // ========== ПРЕДПРОСМОТР ДОКУМЕНТА ==========
   const DocumentPreview = () => {
     if (!selectedTemplate) return null;
     return (
@@ -377,7 +369,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     );
   };
 
-  // ========== УСЛОВНЫЕ РЕНДЕРЫ ==========
   if (showWaybillNew) {
     return (
       <WaybillNewPage
@@ -402,11 +393,9 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     );
   }
 
-  // ========== ОСНОВНОЙ РЕНДЕР ==========
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar hideMinimize={true} userName={userName} title="Оформление заявки на перевозку грузов" />
-
       <div className="absolute top-4 right-6 z-10 flex gap-3">
         <button onClick={onBack} className="px-4 py-2 bg-[#3ABC96] hover:bg-[#1e4bc2] text-white font-medium rounded-lg shadow-md flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -414,14 +403,11 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
         </button>
         <button onClick={onLogout} className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg shadow-md">Выход</button>
       </div>
-
       {showNotification && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-[#3ABC96] text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
           ✅ Данные сохранены!
         </div>
       )}
-
-      {/* Модальное окно выбора печатной формы */}
       {printStyleModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="w-[450px] rounded-2xl shadow-xl p-6" style={{ backgroundColor: '#6990F5', border: '1px solid #C9D9FF' }}>
@@ -445,8 +431,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
           </div>
         </div>
       )}
-
-      {/* Модальное окно предупреждения перед переходом в накладную */}
       {showWaybillModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="w-[450px] bg-[#8778C3] rounded-lg overflow-hidden shadow-xl">
@@ -459,10 +443,7 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
           </div>
         </div>
       )}
-
-      {/* Основной контент: форма + предпросмотр */}
       <div className="pt-[37px] px-6 pb-6 h-screen flex gap-6 overflow-hidden">
-        {/* Левая колонка – форма */}
         <div className="w-1/2 bg-white rounded-lg shadow-lg overflow-y-auto p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">Оформление документа</h2>
           <div className="space-y-4">
@@ -484,8 +465,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
             {selectedTemplate && selectedTemplate.fields.map(field => renderField(field))}
           </div>
         </div>
-
-        {/* Правая колонка – предпросмотр */}
         <div className="w-1/2 flex flex-col">
           <div className="bg-[#C9D9FF] py-2 px-4 rounded-t-lg">
             <h3 className="font-semibold text-gray-800">Предварительный просмотр документа</h3>
@@ -494,8 +473,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
           <div className="flex-1 bg-[#EFECF9] rounded-b-lg p-4 overflow-y-auto">
             <DocumentPreview />
           </div>
-
-          {/* Кнопки действий */}
           <div className="flex gap-4 mt-4">
             <button
               onClick={handleSave}
@@ -515,7 +492,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
             >
               🖨️ Печать
             </button>
-            {/* Кнопка «В накладную» показывается только для ГУ‑12 и ГУ‑13 */}
             {canGoToWaybill(selectedTemplate) && (
               <button
                 onClick={handleOpenWaybillModal}
