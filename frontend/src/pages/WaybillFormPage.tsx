@@ -242,7 +242,7 @@ export function WaybillForm({
       return value !== undefined && value !== null && value !== '';
     });
     return (
-      <div className=" rounded-lg shadow-lg p-6 font-serif">
+     <div className="bg-white rounded-lg shadow-lg p-6 font-serif">
         <div className="text-center border-b-2 border-[#2860F0] pb-4 mb-4">
           <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">{docName}</h2>
         </div>

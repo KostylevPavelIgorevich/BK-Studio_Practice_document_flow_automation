@@ -198,7 +198,7 @@ export function WaybillForm({
             <h3 className="font-semibold text-gray-800">Предварительный просмотр</h3>
           </div>
           <div className="flex-1 bg-[#EFECF9] rounded-b-lg p-4 overflow-y-auto">
-            <div className=" rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               {fieldsConfig.filter(f => f.type !== 'hidden').map(field => (
                 <div key={field.key} className="flex py-2 border-b border-dashed">
                   <div className="w-40 font-semibold">{field.label}:</div>
