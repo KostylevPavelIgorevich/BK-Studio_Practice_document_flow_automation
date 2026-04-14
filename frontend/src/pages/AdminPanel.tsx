@@ -119,16 +119,25 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
   // ========== ГРУППЫ ==========
   const handleCreateGroup = () => { setNewGroupName(''); setIsCreateGroupModalOpen(true); };
-  const handleAcceptCreateGroup = async () => {
-    const error = validateGroupName(newGroupName);
-    if (error) { alert(error); return; }
-    try {
-      await createGroup(newGroupName.trim());
-      await loadGroups();
-      setIsCreateGroupModalOpen(false);
-      setNewGroupName('');
-    } catch (error) { alert('Ошибка при создании группы'); }
-  };
+ const handleAcceptCreateGroup = async () => {
+  const error = validateGroupName(newGroupName);
+  if (error) { alert(error); return; }
+  try {
+    await createGroup(newGroupName.trim());
+    await loadGroups();
+    setIsCreateGroupModalOpen(false);
+    setNewGroupName('');
+  } catch (err: any) {
+    console.error(err);
+    if (err.errors?.name) {
+      alert(err.errors.name[0]);
+    } else if (err.message) {
+      alert(err.message);
+    } else {
+      alert('Ошибка при создании группы');
+    }
+  }
+};
 
   const handleSelectGroup = (id: number) => setSelectedGroupId(id);
   const handleEditGroup = () => {
@@ -169,28 +178,37 @@ const handleCreateUser = () => {
   });
   setIsCreateUserModalOpen(true);
 };
-  const handleAcceptCreateUser = async () => {
-    const loginError = validateLogin(newUser.login);
-    if (loginError) { alert(loginError); return; }
-    const lastNameError = validateNameField(newUser.last_name, 'Фамилия');
-    if (lastNameError) { alert(lastNameError); return; }
-    const firstNameError = validateNameField(newUser.first_name, 'Имя');
-    if (firstNameError) { alert(firstNameError); return; }
-    if (newUser.middle_name && !/^[а-яА-Яa-zA-Z\s\-]+$/.test(newUser.middle_name)) {
-      alert('Отчество может содержать только буквы, дефис и пробелы');
-      return;
-    }
-    if (!newUser.password.trim()) { alert('Введите пароль'); return; }
-    if (!newUser.group_id) { alert('Выберите группу'); return; }
+const handleAcceptCreateUser = async () => {
+  const loginError = validateLogin(newUser.login);
+  if (loginError) { alert(loginError); return; }
+  const lastNameError = validateNameField(newUser.last_name, 'Фамилия');
+  if (lastNameError) { alert(lastNameError); return; }
+  const firstNameError = validateNameField(newUser.first_name, 'Имя');
+  if (firstNameError) { alert(firstNameError); return; }
+  if (newUser.middle_name && !/^[а-яА-Яa-zA-Z\s\-]+$/.test(newUser.middle_name)) {
+    alert('Отчество может содержать только буквы, дефис и пробелы');
+    return;
+  }
+  if (!newUser.password.trim()) { alert('Введите пароль'); return; }
+  if (!newUser.group_id) { alert('Выберите группу'); return; }
 
-    try {
-      await createUser(newUser);
-      await loadUsers();
-      setIsCreateUserModalOpen(false);
-      setNewUser({ login: '', password: '', last_name: '', first_name: '', middle_name: '', role_id: 2, group_id: groups[0]?.id || 1 });
-      alert('Пользователь создан');
-    } catch (error: any) { alert(error.message || 'Ошибка создания'); }
-  };
+  try {
+    await createUser(newUser);
+    await loadUsers();
+    setIsCreateUserModalOpen(false);
+    setNewUser({ login: '', password: '', last_name: '', first_name: '', middle_name: '', role_id: 2, group_id: groups[0]?.id || 1 });
+    alert('Пользователь создан');
+  } catch (err: any) {
+    console.error(err);
+    if (err.errors?.login) {
+      alert(err.errors.login[0]);
+    } else if (err.message) {
+      alert(err.message);
+    } else {
+      alert('Ошибка создания');
+    }
+  }
+};
 
   const handleSelectUserForEdit = (id: number) => setSelectedUserIdForEdit(id);
   const handleEditUser = () => {
@@ -467,7 +485,7 @@ const handleCreateUser = () => {
               ) : (
                 <>
                   <input type="text" value={editUser.login} onChange={(e) => setEditUser({...editUser, login: e.target.value})} placeholder="Логин" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-900" />
-                  <input type="password" value={editUser.password} onChange={(e) => setEditUser({...editUser, password: e.target.value})} placeholder="Пароль (оставьте пустым, если не менять)" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-900" />
+                  <input type="password" value={editUser.password} onChange={(e) => setEditUser({...editUser, password: e.target.value})} placeholder="Пароль по умолчанию" className="w-full px-4 py-2 bg-[#C9D9FF] border border-[#919191] rounded-lg text-gray-900" />
                 </>
               )}
             </div>
