@@ -88,65 +88,58 @@ if (currentPage === 'application') {
       <div className="px-6 pb-12">
         <div className="max-w-[1100px] mx-auto">
           <div className="flex gap-6 justify-center mb-6">
-            {firstRowButtons.map((button) => {
-              const isHovered = hoveredButton === button.id;
-              return (
-                <button
-                  key={button.id}
-                  onClick={button.onClick}
-                  onMouseEnter={() => setHoveredButton(button.id)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  className={`
-                    ${button.width} ${button.height}
-                    ${isHovered ? button.hoverBg : button.defaultBg}
-                    ${isHovered ? button.hoverText : button.defaultText}
-                    ${isHovered ? button.hoverBorder : button.defaultBorder}
-                    rounded-2xl shadow-lg transition-all duration-300
-                    flex items-center justify-center text-center font-bold text-xl
-                    whitespace-pre-line relative z-10
-                    ${isHovered ? 'scale-105 shadow-2xl' : 'hover:scale-105 hover:shadow-2xl'}
-                  `}
-                  style={{
-                    boxShadow: isHovered ? '0 0 0 4px white, 0 0 0 8px rgba(0,0,0,0.1)' : undefined,
-                  }}
-                >
-                  {button.title}
-                </button>
-              );
-            })}
+{firstRowButtons.map((button) => {
+  const isHovered = hoveredButton === button.id;
+  return (
+    <button
+      key={button.id}
+      onClick={button.onClick}
+      onMouseEnter={() => setHoveredButton(button.id)}
+      onMouseLeave={() => setHoveredButton(null)}
+      className={`
+        ${button.width} ${button.height}
+        ${isHovered ? button.hoverBg : button.defaultBg}
+        ${isHovered ? button.hoverText : button.defaultText}
+        ${isHovered ? button.hoverBorder : button.defaultBorder}
+        rounded-2xl shadow-lg transition-all duration-[1000ms]
+        flex items-center justify-center text-center font-bold text-xl
+        whitespace-pre-line relative z-10
+        ${isHovered ? 'shadow-xl' : 'hover:shadow-xl'}
+      `}
+    >
+      {button.title}
+    </button>
+  );
+})}
           </div>
           <div className="flex gap-6 justify-center mb-6">
-            {secondRowButtons.map((button) => {
-              const isHovered = hoveredButton === button.id;
-              return (
-                <button
-                  key={button.id}
-                  onClick={button.onClick}
-                  onMouseEnter={() => setHoveredButton(button.id)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                  className={`
-                    ${button.width} ${button.height}
-                    ${isHovered ? button.hoverBg : button.defaultBg}
-                    ${isHovered ? button.hoverText : button.defaultText}
-                    ${isHovered ? button.hoverBorder : button.defaultBorder}
-                    rounded-2xl shadow-lg transition-all duration-300
-                    flex items-center justify-center text-center font-bold text-xl
-                    whitespace-pre-line relative z-10
-                    ${isHovered ? 'scale-105 shadow-2xl' : 'hover:scale-105 hover:shadow-2xl'}
-                  `}
-                  style={{
-                    boxShadow: isHovered ? '0 0 0 4px white, 0 0 0 8px rgba(0,0,0,0.1)' : undefined,
-                  }}
-                >
-                  {button.title}
-                </button>
-              );
-            })}
+         {secondRowButtons.map((button) => {
+  const isHovered = hoveredButton === button.id;
+  return (
+    <button
+      key={button.id}
+      onClick={button.onClick}
+      onMouseEnter={() => setHoveredButton(button.id)}
+      onMouseLeave={() => setHoveredButton(null)}
+      className={`
+        ${button.width} ${button.height}
+        ${isHovered ? button.hoverBg : button.defaultBg}
+        ${isHovered ? button.hoverText : button.defaultText}
+        ${isHovered ? button.hoverBorder : button.defaultBorder}
+        rounded-2xl shadow-lg transition-all duration-[1000ms]
+        flex items-center justify-center text-center font-bold text-xl
+        whitespace-pre-line relative z-10
+        ${isHovered ? 'shadow-xl' : 'hover:shadow-xl'}
+      `}
+    >
+      {button.title}
+    </button>
+  );
+})}
           </div>
         </div>
       </div>
 
-      {hoveredButton && <div className="fixed inset-0 bg-black bg-opacity-50 z-0 transition-all duration-300" />}
-    </div>
+{hoveredButton && <div className="fixed inset-0 bg-black bg-opacity-20 z-0 transition-all duration-500 delay-1000 backdrop-blur-sm" />}  </div>
   );
 }
