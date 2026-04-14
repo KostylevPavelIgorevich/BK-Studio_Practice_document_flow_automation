@@ -39,7 +39,9 @@ function getHeaders(): HeadersInit {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `Ошибка ${response.status}`);
+    const err = new Error(error.message || `Ошибка ${response.status}`);
+    (err as any).errors = error.errors; // ← добавляем объект с ошибками полей
+    throw err;
   }
   return response.json();
 }

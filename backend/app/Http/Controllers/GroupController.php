@@ -18,7 +18,9 @@ class GroupController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:groups'
+            'name' => 'required|string|max:255|unique:groups,name',
+        ], [
+            'name.unique' => 'Группа с таким названием уже существует',
         ]);
 
         $id = DB::table('groups')->insertGetId([

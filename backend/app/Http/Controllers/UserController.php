@@ -17,23 +17,38 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'login' => 'required|string|max:255|unique:users,login',
+            'password' => 'required|string|min:4',
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'group_id' => 'nullable|integer|exists:groups,id',
+        ], [
+            'login.unique' => 'Пользователь с таким логином уже существует',
+            'login.required' => 'Логин обязателен',
+            'password.required' => 'Пароль обязателен',
+            'password.min' => 'Пароль должен содержать не менее 4 символов',
+            'last_name.required' => 'Фамилия обязательна',
+            'first_name.required' => 'Имя обязательно',
+        ]);
+
         try {
             $data = $request->all();
-
             $groupId = isset($data['group_id']) && $data['group_id'] !== null && $data['group_id'] !== ''
                 ? (int) $data['group_id']
                 : null;
 
             $userId = DB::table('users')->insertGetId([
                 'login' => $data['login'],
-                'password' => Hash::make($data['password']),  // ← хешируем
+                'password' => Hash::make($data['password']),
                 'last_name' => $data['last_name'],
                 'first_name' => $data['first_name'],
                 'middle_name' => $data['middle_name'] ?? '',
                 'role_id' => 2,
                 'group_id' => $groupId,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             return response()->json([
@@ -50,7 +65,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
     public function update(Request $request, $id)
     {
         try {
