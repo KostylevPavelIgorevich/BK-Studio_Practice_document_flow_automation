@@ -40,7 +40,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     const err = new Error(error.message || `Ошибка ${response.status}`);
-    (err as any).errors = error.errors; // ← добавляем объект с ошибками полей
+    (err as any).errors = error.errors;
     throw err;
   }
   return response.json();
@@ -57,7 +57,7 @@ function getCurrentUserId(): number {
   } catch (e) {
     console.error('Ошибка получения user_id:', e);
   }
-  return 1; // fallback
+  return 1;
 }
 
 // ========== CSRF ==========
@@ -299,36 +299,6 @@ export async function printWaybill(id: number): Promise<{ html: string }> {
   return handleResponse(response);
 }
 
-// ========== НОВАЯ ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ КОНФИГУРАЦИИ НАКЛАДНОЙ ==========
-// export async function getWaybillConfig(option: string, type: string, form: string) {
-//   const response = await fetch(
-//     `${API_BASE_URL}/waybill/config?option=${encodeURIComponent(option)}&type=${encodeURIComponent(type)}&form=${encodeURIComponent(form)}`,
-//     {
-//       headers: getHeaders(),
-//       credentials: 'include',
-//     }
-//   );
-//   return handleResponse(response);
-// }
-
-// ========== ФУНКЦИЯ ДЛЯ СОХРАНЕНИЯ НАКЛАДНОЙ (ОБНОВЛЁННАЯ) ==========
-// export async function saveWaybill(data: {
-//   user_id: number;
-//   option: string;
-//   type: string;
-//   form: string;
-//   form_data: Record<string, any>;
-// }): Promise<any> {
-//   const response = await fetch(`${API_BASE_URL}/waybill/save`, {
-//     method: 'POST',
-//     headers: getHeaders(),
-//     credentials: 'include',
-//     body: JSON.stringify(data),
-//   });
-//   return handleResponse(response);
-// }
-
-// ========== ЗАЯВКИ ДЛЯ НАКЛАДНОЙ ==========
 // ========== ЗАЯВКИ ДЛЯ НАКЛАДНОЙ ==========
 export async function getApplications(): Promise<any[]> {
   const response = await fetch(`${API_BASE_URL}/applications`, {
@@ -352,25 +322,9 @@ export async function createWaybillFromApplication(data: {
   return handleResponse(response);
 }
 
-// ========== ПОЛУЧЕНИЕ ШАБЛОНОВ ИЗ ПАПКИ TEMPLATES ==========
-export async function getApplicationsFromTemplates(): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/templates/applications`, {
-    headers: getHeaders(),
-    credentials: 'include',
-  });
-  return handleResponse(response);
-}
-
-export async function getWaybillsFromTemplates(): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/templates/waybills`, {
-    headers: getHeaders(),
-    credentials: 'include',
-  });
-  return handleResponse(response);
-}
-
-export async function scanAllTemplates(): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/templates/scan`, {
+// ========== ПОЛУЧЕНИЕ СПИСКА ШАБЛОНОВ ИЗ ПАПКИ TEMPLATES ==========
+export async function getTemplatesList(): Promise<string[]> {
+  const response = await fetch(`${API_BASE_URL}/templates/list`, {
     headers: getHeaders(),
     credentials: 'include',
   });
@@ -414,8 +368,7 @@ export default {
   printWaybill,
   getApplications,
   createWaybillFromApplication,
-  getApplicationsFromTemplates,
-  getWaybillsFromTemplates,
-  scanAllTemplates,
+  getTemplatesList,
   forceLogoutAndReset,
+  
 };

@@ -9,7 +9,7 @@ interface WaybillDetailsPageProps {
   waybillType: string;
   formType: string;
   waybillId: number;
-  // Добавляем динамические поля и данные (как в WaybillForm)
+ 
   fieldsConfig: Array<{
     key: string;
     label: string;
@@ -31,28 +31,26 @@ export function WaybillDetailsPage({
   formData: externalFormData,
   onFormDataChange
 }: WaybillDetailsPageProps) {
-  // Локальное состояние для формы (копируем внешние данные)
+ 
   const [localFormData, setLocalFormData] = useState<Record<string, any>>(externalFormData);
   const [showNotification, setShowNotification] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   
-  // Опционально: группировка полей по секциям (если нужно)
-  // Если не нужна, можно просто рендерить все поля подряд
+ 
   const [selectedSection, setSelectedSection] = useState('Основные сведения');
   
-  // Пример группировки (настройте под свои нужды)
+ 
   const sectionOptions = ['Основные сведения', 'Отправитель', 'Получатель', 'Перевозка'];
-  // Функция для фильтрации полей по секции (если нужно)
+  
   const getFieldsForSection = (section: string) => {
-    // Здесь можно реализовать логику группировки по ключам
-    // Пока возвращаем все поля
+   
     return fieldsConfig;
   };
 
   useEffect(() => {
-    // Синхронизация с внешними данными (если они обновляются)
+    
     setLocalFormData(externalFormData);
   }, [externalFormData]);
 
@@ -62,7 +60,7 @@ export function WaybillDetailsPage({
     if (onFormDataChange) onFormDataChange(newData);
   };
 
-  // ========== СОХРАНЕНИЕ ДАННЫХ ==========
+  
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -83,7 +81,7 @@ export function WaybillDetailsPage({
     }
   };
 
-  // ========== ПЕЧАТЬ ==========
+  
   const handlePrint = async () => {
     setIsPrinting(true);
     try {
@@ -105,7 +103,7 @@ export function WaybillDetailsPage({
     }
   };
 
-  // ========== ПРЕДПРОСМОТР (АВТОМАТИЧЕСКИЙ, КАК В ЗАЯВКЕ) ==========
+  
   const DocumentPreview = () => {
     // Берём только заполненные поля
     const filledFields = fieldsConfig.filter(field => {
@@ -152,7 +150,7 @@ export function WaybillDetailsPage({
     );
   };
 
-  // ========== РЕНДЕР ПОЛЕЙ ФОРМЫ (с группировкой по секциям, опционально) ==========
+  
   const renderFields = () => {
     const fieldsToShow = getFieldsForSection(selectedSection);
     return (
@@ -174,12 +172,12 @@ export function WaybillDetailsPage({
     );
   };
 
-  // ========== ОСНОВНОЙ РЕНДЕР ==========
+
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar />
       
-      {/* Уведомление о сохранении */}
+   
       {showNotification && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-[#3ABC96] text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
           ✅ Данные сохранены!
@@ -208,7 +206,7 @@ export function WaybillDetailsPage({
             Заполнение данных
           </h2>
           <div className="space-y-4">
-            {/* Если нужен выбор секции - раскомментировать */}
+           
             {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Раздел</label>
               <select

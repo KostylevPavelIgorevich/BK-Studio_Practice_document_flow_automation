@@ -15,8 +15,7 @@ export function UserDashboard({ userName, userId, onLogout }: UserDashboardProps
   const [isContainerHovered, setIsContainerHovered] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
   const [showWaybillNewPage, setShowWaybillNewPage] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleNavigateToApplication = () => setCurrentPage('application');
   const handleNavigateToCalculation = () => console.log('Расчет провозной платы');
   const handleNavigateToOther = () => console.log('Прочие формы');

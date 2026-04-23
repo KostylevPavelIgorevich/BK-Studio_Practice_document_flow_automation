@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 import logo from '../assets/logo.png';
 import minimizeIcon from '../assets/share.png';
 import maximizeIcon from '../assets/screen.png';
@@ -6,8 +5,8 @@ import closeIcon from '../assets/exit.png';
 
 interface NavbarProps {
   hideMinimize?: boolean;
-  userName?: string;      // ФИО пользователя (отображается сверху, если передан)
-  title?: string;         // основной текст (если не передан, используется стандартный)
+  userName?: string;
+  title?: string;
 }
 
 export function Navbar({ hideMinimize = false, userName, title }: NavbarProps) {
@@ -19,7 +18,6 @@ export function Navbar({ hideMinimize = false, userName, title }: NavbarProps) {
 
   return (
     <nav className="bg-[#2860F0] px-6 py-4 flex justify-between items-center">
-      {/* Левая часть: логотип + тексты */}
       <div className="flex items-center gap-3">
         <img src={logo} alt="Documentob Diplom" className="h-8 w-auto" />
         <div className="flex flex-col">
@@ -33,8 +31,6 @@ export function Navbar({ hideMinimize = false, userName, title }: NavbarProps) {
           </span>
         </div>
       </div>
-
-      {/* Правая часть: кнопки управления окном */}
       <div className="flex gap-3">
         {!hideMinimize && (
           <button

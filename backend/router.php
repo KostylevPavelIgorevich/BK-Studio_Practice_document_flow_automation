@@ -1,18 +1,5 @@
 <?php
-// CORS для разработки (обрабатываем preflight и добавляем заголовки)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Origin: http://localhost:1420');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Auth-Token, Authorization');
-    header('Access-Control-Allow-Credentials: true');
-    http_response_code(200);
-    exit();
-}
-
-header('Access-Control-Allow-Origin: http://localhost:1420');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Auth-Token, Authorization');
-header('Access-Control-Allow-Credentials: true');
+// ВЕСЬ CORS УДАЛЕН - ТЕПЕРЬ ИМИ ЗАНИМАЕТСЯ ТОЛЬКО LARAVEL (config/cors.php)
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $publicDir = __DIR__ . '/public';
@@ -38,7 +25,7 @@ if ($uri !== '/' && is_file($filePath)) {
     exit;
 }
 
-// API-маршруты (перенаправляем в Laravel)
+// API-маршруты (перенаправляем в Laravel) - CORS добавит сам Laravel
 $api_prefixes = ['/api', '/login', '/logout', '/templates', '/documents', '/users', '/groups', '/csrf-token', '/temp', '/test', '/applications', '/waybill', '/document-types'];
 foreach ($api_prefixes as $prefix) {
     if (strpos($uri, $prefix) === 0) {

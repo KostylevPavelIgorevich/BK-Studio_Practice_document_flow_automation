@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { WaybillForm } from './WaybillForm';
-import { getWaybillsFromTemplates, getDocuments } from '../services/api';
+import { getDocumentTypes, getTemplatesList, getDocuments } from '../services/api';
 
 interface WaybillNewPageProps {
   onBack: () => void;
@@ -19,35 +19,60 @@ interface WaybillNewPageProps {
 }
 
 interface Template {
-  id: number;           // ← добавить
+  id: number;
   filename: string;
   name: string;
-  type: string;
   fields: any[];
   html_content: string;
 }
 
-interface Application {
-  id: number;
-  created_at: string;
-  form_data: any;
-  document_type: any;
-}
+// Определение, является ли документ накладной
+const isWaybill = (filename: string, html: string): boolean => {
+  const text = (filename + ' ' + html).toLowerCase();
+  return text.includes('waybill') || text.includes('накладная');
+};
 
-export function WaybillNewPage({ 
-  onBack, 
-  onLogout, 
-  userId, 
-  fromApplication = false, 
+// Извлечение полей из HTML (поддерживает {{ field }} и {{ field;label }})
+const extractFieldsFromHtml = (html: string): any[] => {
+  const pattern = /{{\s*([a-zA-Z_][a-zA-Z0-9_]*)(?:;([^}]*))?\s*}}/g;
+  const fieldsMap = new Map();
+  let match;
+  while ((match = pattern.exec(html)) !== null) {
+    const key = match[1];
+    const label = match[2]?.trim() || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    if (!fieldsMap.has(key)) {
+      fieldsMap.set(key, { key, label, type: 'text', required: true });
+    }
+  }
+  // Условные блоки
+  const conditionalPattern = /\{\{#if\s+(\w+)\s*\}\}/g;
+  while ((match = conditionalPattern.exec(html)) !== null) {
+    if (!fieldsMap.has(match[1])) {
+      fieldsMap.set(match[1], {
+        key: match[1],
+        label: match[1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        type: 'text',
+        required: false,
+      });
+    }
+  }
+  return Array.from(fieldsMap.values());
+};
+
+export function WaybillNewPage({
+  onBack,
+  onLogout,
+  userId,
+  fromApplication = false,
   userName,
-  initialWaybillData
+  initialWaybillData,
 }: WaybillNewPageProps) {
   const [option, setOption] = useState(initialWaybillData?.option || '');
   const [waybillType, setWaybillType] = useState(initialWaybillData?.waybillType || '');
   const [selectedFormType, setSelectedFormType] = useState<string>('wagon');
   const [showModal, setShowModal] = useState(false);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [applications, setApplications] = useState<any[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
   const [loadingApps, setLoadingApps] = useState(false);
   const [waybillTemplates, setWaybillTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -59,7 +84,7 @@ export function WaybillNewPage({
     { value: 'gu12', label: 'По заявке на перевозку грузов ГУ-12' },
     { value: 'gu13', label: 'По распоряжению о внутрихозяйственных перевозках ГУ-13' },
   ];
-  
+
   const typeOptions = [
     { value: '90', label: '90 - Универсальный перевозочный документ' },
     { value: '94', label: '94 - Универсальный перевозочный документ' },
@@ -79,16 +104,43 @@ export function WaybillNewPage({
   const loadWaybillTemplates = async () => {
     setIsLoading(true);
     try {
-      const response = await getWaybillsFromTemplates();
-      if (response && response.success) {
-        const waybillsData = response.waybills || [];
-        setWaybillTemplates(waybillsData);
-        if (waybillsData.length > 0) {
-          setSelectedTemplate(waybillsData[0]);
-        }
+      const files = await getTemplatesList();
+      const dbTypes = await getDocumentTypes();
+      const typeMap = new Map<string, number>();
+      dbTypes.forEach((t: any) => {
+        if (t.html_template) typeMap.set(t.html_template, t.id);
+      });
+
+      const waybills: Template[] = [];
+
+      for (const filename of files) {
+        const res = await fetch(`/templates/${filename}`);
+        if (!res.ok) continue;
+        const html = await res.text();
+        if (!isWaybill(filename, html)) continue;
+
+        const fields = extractFieldsFromHtml(html);
+        const docName =
+          html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
+          html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
+          filename.replace('.html', '').replace(/_/g, ' ');
+
+        waybills.push({
+          id: typeMap.get(filename) || 0,
+          filename,
+          name: docName,
+          fields,
+          html_content: html,
+        });
+      }
+
+      setWaybillTemplates(waybills);
+      if (waybills.length > 0 && !selectedTemplate) {
+        setSelectedTemplate(waybills[0]);
+        setSelectedFormType(getFormTypeFromFilename(waybills[0].filename));
       }
     } catch (error) {
-      console.error('Ошибка загрузки шаблонов:', error);
+      console.error('Ошибка загрузки накладных:', error);
     } finally {
       setIsLoading(false);
     }
@@ -135,22 +187,22 @@ export function WaybillNewPage({
       alert('Выберите заявку');
       return;
     }
-    
+
     let formData = selectedApplication.form_data;
     if (typeof formData === 'string') {
       try {
         formData = JSON.parse(formData);
-      } catch (e) {
+      } catch {
         formData = {};
       }
     }
-    
+
     const defaultTemplate = waybillTemplates.find(t => t.filename.includes('wagon'));
     if (defaultTemplate) {
       setSelectedTemplate(defaultTemplate);
       setSelectedFormType(getFormTypeFromFilename(defaultTemplate.filename));
     }
-    
+
     setInitialFormData(formData);
     setShowModal(false);
     setShowForm(true);
@@ -175,19 +227,25 @@ export function WaybillNewPage({
       alert('Выберите форму накладной');
       return;
     }
-    
+
     const template = waybillTemplates.find(t => 
       (selectedFormType === 'wagon' && t.filename.includes('wagon')) ||
       (selectedFormType === 'group' && t.filename.includes('group')) ||
       (selectedFormType === 'container' && t.filename.includes('container') && !t.filename.includes('container_set')) ||
       (selectedFormType === 'container_set' && t.filename.includes('container_set'))
     );
-    
+
     if (template) {
       setSelectedTemplate(template);
       setSelectedFormType(getFormTypeFromFilename(template.filename));
+    } else if (waybillTemplates.length > 0) {
+      setSelectedTemplate(waybillTemplates[0]);
+      setSelectedFormType(getFormTypeFromFilename(waybillTemplates[0].filename));
+    } else {
+      alert('Нет доступных шаблонов накладных');
+      return;
     }
-    
+
     setShowForm(true);
   };
 
@@ -200,6 +258,12 @@ export function WaybillNewPage({
       alert('Выберите тип накладной');
       return;
     }
+    if (waybillTemplates.length > 0) {
+      setSelectedTemplate(waybillTemplates[0]);
+      setShowForm(true);
+    } else {
+      alert('Нет доступных шаблонов накладных');
+    }
   };
 
   if (showForm && selectedTemplate) {
@@ -211,7 +275,7 @@ export function WaybillNewPage({
         option={option}
         type={waybillType}
         form={selectedFormType}
-        documentTypeId={selectedTemplate.id}   // ← передаём ID
+        documentTypeId={selectedTemplate.id}
         fieldsConfig={selectedTemplate.fields}
         htmlTemplate={selectedTemplate.html_content}
         initialData={initialFormData}
@@ -225,7 +289,7 @@ export function WaybillNewPage({
       <div className="min-h-screen bg-[#E4E9F8] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#2860F0] mb-4"></div>
-          <p className="text-gray-600">Загрузка...</p>
+          <p className="text-gray-600">Загрузка накладных...</p>
         </div>
       </div>
     );
@@ -234,19 +298,23 @@ export function WaybillNewPage({
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
       <Navbar hideMinimize={true} userName={userName} title="Оформление железнодорожной накладной" />
-      
+
       <div className="absolute top-4 right-6 z-10 flex gap-3">
         <button onClick={onBack} className="px-4 py-2 bg-[#3ABC96] hover:bg-[#1e4bc2] text-white font-medium rounded-lg shadow-md flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
           В начало
         </button>
-        <button onClick={onLogout} className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg shadow-md">Выход</button>
+        <button onClick={onLogout} className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg shadow-md">
+          Выход
+        </button>
       </div>
 
       <div className="pt-20 px-6">
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
           <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Сведения о перевозочном документе</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -269,7 +337,7 @@ export function WaybillNewPage({
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Тип накладной <span className="text-red-500">*</span>
@@ -285,7 +353,7 @@ export function WaybillNewPage({
                 ))}
               </select>
             </div>
-            
+
             {!fromApplication && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,7 +372,7 @@ export function WaybillNewPage({
               </div>
             )}
           </div>
-          
+
           <div className="mt-6 flex justify-end">
             <button
               onClick={fromApplication ? handleContinueFromApplication : handleContinueFromDashboard}
@@ -356,8 +424,12 @@ export function WaybillNewPage({
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={handleModalAccept} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg border border-white">Принять</button>
-              <button onClick={handleModalCancel} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg border border-white">Отмена</button>
+              <button onClick={handleModalAccept} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg border border-white">
+                Принять
+              </button>
+              <button onClick={handleModalCancel} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg border border-white">
+                Отмена
+              </button>
             </div>
           </div>
         </div>

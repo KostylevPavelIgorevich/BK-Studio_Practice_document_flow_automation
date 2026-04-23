@@ -10,7 +10,7 @@ interface WaybillFormProps {
   option: string;
   type: string;
   form: string;
-  documentTypeId: number;   // ← добавить
+  documentTypeId: number;   
   fieldsConfig: Array<{
     key: string;
     label: string;

@@ -60,3 +60,14 @@ Route::post('/waybill/from-application', [WaybillController::class, 'store']);
 Route::get('/waybill/config', [App\Http\Controllers\WaybillConfigController::class, 'getConfig']);
 Route::post('/waybill/save', [WaybillController::class, 'store']);
 Route::get('/waybill/{id}/print', [WaybillController::class, 'printWaybill']);
+Route::get('/templates/list', function () {
+    $path = public_path('templates');
+    if (!is_dir($path)) {
+        return response()->json([]);
+    }
+    $files = glob($path . '/*.html');
+    $names = array_map(function($file) {
+        return basename($file);
+    }, $files);
+    return response()->json($names);
+});

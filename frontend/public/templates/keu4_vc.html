@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+        <section class="keu_4_vc_class verticalPage newPage printArea pagePanel">
+    <div class="pPageBorder">
+        <div style="width: 19.5cm; margin: auto;">
+            <div class="header">
+                <div>
+                    <div class="left" style="width: 55%; display: inline-block;">
+                        &nbsp;
+                    </div>
+                    <!-- /.left -->
+                    <div class="right" style="text-align: left; display: inline-block;">
+                        <div><span>Форма КЭУ - 4ВЦ</span> <span class="border-div" style="padding-right: 10px; padding-left: 10px;">{{ form_code;Код_формы }}</span></div>
+                        <div>Утверждена ОАО "РЖД" в 2004г.</div>
+                    </div>
+                    <!-- /.right -->
+                </div>
+                <div><br><br></div>
+                <div style="width: 100%; text-align: center; text-transform: uppercase;">
+                    <h4><b>Приемо-сдаточный акт № <span class="_keu_4_vc_ActNumber">{{ act_number;Номер_акта }}</span></b></h4>
+                </div>
+                <!-- /.right -->
+                <div>Перевозчик <b><span>{{ carrier;Перевозчик }}</span></b></div>
+                <div>Станция отправления <b><span class="_keu_4_vc_SendStationName">{{ departure_station;Станция_отправления }}</span></b></div>
+                <div>Станция назначения <b><span class="_keu_4_vc_DestStationName">{{ destination_station;Станция_назначения }}</span></b></div>
+                <div>
+                    <div style="width: 50%;display: inline-block;">№ вагона <b><span class="_keu_4_vc_WagonNumber">{{ wagon_number;Номер_вагона }}</span></b></div><!--
+                 --><div style="width: 50%;display: inline-block;">№ накладной <b><span class="_keu_4_vc_WayBillNumber">{{ waybill_number;Номер_накладной }}</span></b></div>
+                </div>
+                <div>Грузоотправитель <b><span class="_keu_4_vc_CargoSender">{{ shipper;Грузоотправитель }}</span></b></div>
+                <div>Грузополучатель <b><span class="_keu_4_vc_CargoReceiver">{{ consignee;Грузополучатель }}</span></b></div>
+                <div>Наименование груза <b><span class="_keu_4_vc_CargoName">{{ cargo_name;Наименование_груза }}</span></b></div>
+                <div>
+                    <div style="display: inline-block; vertical-align: top;">Место выдачи (приема)</div>
+                    <div style="display: inline-block;">
+                        <div><b><span class="_keu_4_vc_CargoBayNumber">{{ cargo_bay_number;Место_выдачи }}</span></b></div>
+<!--                        <div>№ пути, склада, площадки</div>-->
+                    </div>
+                </div>
+                <div>
+                    <div style="display: inline-block; vertical-align: top;">Вагон погружен средствами</div>
+                    <div style="display: inline-block;">
+                        <div><b><span class="_keu_4_vc_CargoLoadMean">{{ loading_means;Средства_погрузки }}</span></b></div>
+<!--                        <div>перевозчика, грузоотправителя</div>-->
+                    </div>
+                </div>
+                <div style="text-align: center; display: none;" class="_keu_4_vc_fromWagon">
+                    <h4><b>1. Выдача груза по частям из вагона, склада</b></h4>
+                </div>
+                <div style="text-align: center; display: none;" class="_keu_4_vc_toStorage">
+                    <h4><b>1. Прием груза на склад по частям</b></h4>
+                </div>
+            </div>
+            <!-- /.header -->
+            <div class="body">
+                <table style="text-align: center;">
+                    <thead style="text-align: center; font-size: small;">
+                        <tr>
+                            <td style="border: 1px solid black;" rowspan="2">Дата, время</td>
+                            <td style="border: 1px solid black;" rowspan="2">Наименование груза</td>
+                            <td style="border: 1px solid black;" rowspan="2">Количество мест</td>
+                            <td style="border: 1px solid black;" rowspan="2">Масса, кг</td>
+                            <td style="border: 1px solid black;" colspan="4">Автомобиль</td>
+                            <td style="border: 1px solid black;" rowspan="2">№ доверенности</td>
+                            <td style="border: 1px solid black;" colspan="2">Подписи, Ф.И.О.</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;">Номер автом.(полу-прицепа)</td>
+                            <td style="border: 1px solid black;">Прибыл</td>
+                            <td style="border: 1px solid black;">Убыл</td>
+                            <td style="border: 1px solid black;">№ пропус-ка</td>
+                            <td style="border: 1px solid black;"><div>Грузополу-</div><div>чатель,</div><div>грузоотпра-</div><div>витель</div></td>
+                            <td style="border: 1px solid black;">Перевозчик</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="font-weight: bold">
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_CargoDispatchDateTime">{{ dispatch_datetime1;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_CargoType">{{ cargo_type1;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_PlacesCount">{{ places_count1;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_Mass">{{ mass1;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_TransporterNumber">{{ vehicle_number1;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_TransporterArriveTime">{{ arrival_time1;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_TransporterSendTime">{{ departure_time1;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_PassDocumentNumber">{{ pass_number1;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_AggreeDocumentMakeNumber">{{ warrant_number1;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature1;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature1;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime2;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type2;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count2;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass2;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number2;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time2;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time2;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number2;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number2;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature2;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature2;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime3;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type3;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count3;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass3;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number3;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time3;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time3;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number3;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number3;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature3;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature3;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime4;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type4;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count4;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass4;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number4;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time4;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time4;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number4;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number4;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature4;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature4;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime5;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type5;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count5;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass5;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number5;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time5;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time5;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number5;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number5;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature5;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature5;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime6;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type6;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count6;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass6;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number6;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time6;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time6;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number6;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number6;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature6;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature6;Подпись_перевозчика }}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;"><span>{{ dispatch_datetime7;Дата_время }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ cargo_type7;Наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ places_count7;Количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ mass7;Масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ vehicle_number7;Номер_автомобиля }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ arrival_time7;Время_прибытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ departure_time7;Время_убытия }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ pass_number7;Номер_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ warrant_number7;Номер_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ shipper_signature7;Подпись_грузоотправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ carrier_signature7;Подпись_перевозчика }}</span></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold;">
+                            <td style="border: 1px solid black;">ИТОГО:</td>
+                            <td style="border: 1px solid black;"><span>{{ total_cargo_type;Итого_наименование_груза }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_PlacesCount">{{ total_places_count;Итого_количество_мест }}</span></td>
+                            <td style="border: 1px solid black;"><span class="_keu_4_vc_Mass">{{ total_mass;Итого_масса }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_vehicle_number;Итого_автомобили }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_arrival_time;Итого_прибытие }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_departure_time;Итого_убытие }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_pass_number;Итого_пропуска }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_warrant_number;Итого_доверенности }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_shipper_signature;Итого_подписи_отправителя }}</span></td>
+                            <td style="border: 1px solid black;"><span>{{ total_carrier_signature;Итого_подписи_перевозчика }}</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+            </div>
+            <!-- /.body -->
+            <div class="footer noPageSplit">
+                <br>
+                <div>
+                    <div style="width: 50%;display: inline-block; text-align: center;">
+                        <div>Перевозчик</div>
+                        <div style="width: 95%; border-bottom: 1px solid black"><b><span class="_keu_4_vc_TransporterAgentPass">{{ carrier_agent_pass;Данные_представителя_перевозчика }}</span> <span class="_keu_4_vc_TransporterAgentName">{{ carrier_agent_name;ФИО_представителя_перевозчика }}</span></b></div>
+                        <div style="font-size: smaller;">должность, ф.и.о. подпись</div>
+                    </div><!--
+                 --><div style="width: 50%;display: inline-block; text-align: center;">
+                        <div>Грузоотправитель, грузополучатель</div>
+                        <div style="width: 95%; border-bottom: 1px solid black"><b><span class="_keu_4_vc_CargoSenderAgentPass">{{ shipper_agent_pass;Данные_представителя_отправителя }}</span> <span class="_keu_4_vc_CargoSenderAgentName">{{ shipper_agent_name;ФИО_представителя_отправителя }}</span></b></div>
+                        <div style="font-size: smaller;">наименование организации, ф.и.о. подпись</div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div style="text-align: right;">
+                <div style="display: inline-block;">На основании доверенности № </div>
+                <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_AggreeDocumentMakeNumber">{{ warrant_document_number;Номер_доверенности }}</span></b></div>
+                <div style="display: inline-block;">от</div>
+                <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_AggreeDocumentMakeDate">{{ warrant_document_date;Дата_доверенности }}</span></b></div>
+                <div style="display: inline-block;">г.</div>
+            </div>
+            <!-- /.footer -->
+
+            <!-- todo split page -->
+            <div class="_keu_4_vc_approvementData" style="display: none;">
+                <div class="header">
+                    <div style="text-align: center;">
+                        <h4><b>2. Результаты проверки</b></h4>
+                    </div>
+                </div>
+                <!-- /.header -->
+                <div class="body">
+                    <div style="text-align: center;">
+                        <h4>Значится по документам</h4>
+                    </div>
+                    <div>
+                        <table style="width: 100%; text-align: center;">
+                            <thead>
+                                <tr>
+                                    <td style="border: 1px solid black;">Количество мест</td>
+                                    <td style="border: 1px solid black;">Упаковка</td>
+                                    <td style="border: 1px solid black;">Наименование груза</td>
+                                    <td style="border: 1px solid black;">Общая масса, кг</td>
+                                    <td style="border: 1px solid black;">Масса одного места, при стандартной упаковке</td>
+                                </tr>
+                            </thead>
+                            <tbody id="_keu_4_vc_approvedDocumentsTableInsert" style="font-weight: bold;">
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ documented_places_count;Количество_мест_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_packaging;Упаковка_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_cargo_name;Наименование_груза_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_total_mass;Общая_масса_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_unit_mass;Масса_места_по_документам }}</span></td>
+                                </tr>
+                            </tbody>
+                            <tbody1>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ documented_places_count2;Количество_мест_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_packaging2;Упаковка_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_cargo_name2;Наименование_груза_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_total_mass2;Общая_масса_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_unit_mass2;Масса_места_по_документам }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ documented_places_count3;Количество_мест_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_packaging3;Упаковка_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_cargo_name3;Наименование_груза_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_total_mass3;Общая_масса_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_unit_mass3;Масса_места_по_документам }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ documented_places_count4;Количество_мест_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_packaging4;Упаковка_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_cargo_name4;Наименование_груза_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_total_mass4;Общая_масса_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_unit_mass4;Масса_места_по_документам }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ documented_places_count5;Количество_мест_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_packaging5;Упаковка_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_cargo_name5;Наименование_груза_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_total_mass5;Общая_масса_по_документам }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ documented_unit_mass5;Масса_места_по_документам }}</span></td>
+                                </tr>
+                            </tbody1>
+                        </table>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4>В действительности оказалось</h4>
+                    </div>
+                    <div>
+                        <table style="width: 100%; text-align: center;">
+                            <thead>
+                                <tr>
+                                    <td style="border: 1px solid black;">Количество мест</td>
+                                    <td style="border: 1px solid black;">Упаковка</td>
+                                    <td style="border: 1px solid black;">Наименование груза</td>
+                                    <td style="border: 1px solid black;">Общая масса, кг</td>
+                                    <td style="border: 1px solid black;">Масса одного места, при стандартной упаковке</td>
+                                </tr>
+                            </thead>
+                            <tbody style="font-weight: bold;">
+                                <tr>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_PlacesCountApproved">{{ actual_places_count;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_PlacesPackedApproved">{{ actual_packaging;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_CargoTypeApproved">{{ actual_cargo_name;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_CargoMassApproved">{{ actual_total_mass;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_CargoPlaceMassApproved">{{ actual_unit_mass;Фактическая_масса_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ actual_places_count2;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_packaging2;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_cargo_name2;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_total_mass2;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_unit_mass2;Фактическая_масса_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ actual_places_count3;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_packaging3;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_cargo_name3;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_total_mass3;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_unit_mass3;Фактическая_масса_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ actual_places_count4;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_packaging4;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_cargo_name4;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_total_mass4;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_unit_mass4;Фактическая_масса_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ actual_places_count5;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_packaging5;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_cargo_name5;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_total_mass5;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_unit_mass5;Фактическая_масса_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ actual_places_count6;Фактическое_количество_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_packaging6;Фактическая_упаковка }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_cargo_name6;Фактическое_наименование_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_total_mass6;Фактическая_общая_масса }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ actual_unit_mass6;Фактическая_масса_места }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4>В том числе поврежденных</h4>
+                    </div>
+                    <div>
+                        <table style="width: 100%; text-align: center;">
+                            <thead>
+                                <tr>
+                                    <td style="border: 1px solid black;">Количество мест</td>
+                                    <td style="border: 1px solid black;">Упаковка</td>
+                                    <td style="border: 1px solid black;">Наименование груза</td>
+                                    <td style="border: 1px solid black;">Общая масса, кг</td>
+                                    <td style="border: 1px solid black;">Масса одного места, при стандартной упаковке</td>
+                                </tr>
+                            </thead>
+                            <tbody style="font-weight: bold;">
+                                <tr>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_DamagedCargoPlaces">{{ damaged_places_count;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_DamagedPlacesPackType">{{ damaged_packaging;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_DamagedPlacesCargoType">{{ damaged_cargo_name;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_DamagedCargoMass">{{ damaged_total_mass;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span class="_keu_4_vc_DamagedCargoPlaceMass">{{ damaged_unit_mass;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_places_count2;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_packaging2;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_cargo_name2;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_total_mass2;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_unit_mass2;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_places_count3;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_packaging3;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_cargo_name3;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_total_mass3;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_unit_mass3;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_places_count4;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_packaging4;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_cargo_name4;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_total_mass4;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_unit_mass4;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_places_count5;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_packaging5;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_cargo_name5;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_total_mass5;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_unit_mass5;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_places_count6;Количество_поврежденных_мест }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_packaging6;Упаковка_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_cargo_name6;Наименование_поврежденного_груза }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_total_mass6;Общая_масса_поврежденных }}</span></td>
+                                    <td style="border: 1px solid black;"><span>{{ damaged_unit_mass6;Масса_поврежденного_места }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.body -->
+                <div class="footer noPageSplit">
+                    <br>
+                    <div>
+                        <div style="display: inline-block;">Дата </div>
+                        <div style="width: 3cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_TestDate">{{ inspection_date;Дата_проверки }}</span></b></div>
+                        <div style="display: inline-block;">г.</div>
+                        <div style="width: 3cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_TestTime">{{ inspection_time;Время_проверки }}</span></b></div>
+                    </div>
+                    <br>
+                    <div>
+                        <div style="display: inline-block; vertical-align: top;">Перевозчик</div>
+                        <div style="display: inline-block;">
+                            <div style="width: 10cm; border-bottom: 1px solid black"><b><span class="_keu_4_vc_TransporterAgentPass">{{ inspection_carrier_agent_pass;Данные_представителя_перевозчика_проверка }}</span> <span class="_keu_4_vc_TransporterAgentName">{{ inspection_carrier_agent_name;ФИО_представителя_перевозчика_проверка }}</span></b></div>
+                            <div style="font-size: smaller; text-align: center;">должность, ф.и.о., подпись</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: inline-block;vertical-align: top;">Грузополучатель</div>
+                        <div style="display: inline-block;">
+                            <div style="width: 10cm; border-bottom: 1px solid black"><b><span class="_keu_4_vc_CargoSenderAgentPass">{{ inspection_consignee_agent_pass;Данные_представителя_получателя_проверка }}</span> <span class="_keu_4_vc_CargoSenderAgentName">{{ inspection_consignee_agent_name;ФИО_представителя_получателя_проверка }}</span></b></div>
+                            <div style="font-size: smaller; text-align: center;">наименование организации, ф.и.о., подпись</div>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div style="text-align: right;">
+                        <div style="display: inline-block;">На основании доверенности № </div>
+                        <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_AggreeDocumentMakeNumber">{{ inspection_warrant_number;Номер_доверенности_проверка }}</span></b></div>
+                        <div style="display: inline-block;">от</div>
+                        <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><b><span class="_keu_4_vc_AggreeDocumentMakeDate">{{ inspection_warrant_date;Дата_доверенности_проверка }}</span></b></div>
+                        <div style="display: inline-block;">г.</div>
+                    </div>
+                </div>
+                <!-- /.footer -->
+            </div>
+        </div>
+        <!-- /.print-area -->
+    </div>
+</section>
+
+	</body>
+</html>
