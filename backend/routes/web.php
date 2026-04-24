@@ -10,13 +10,6 @@ use App\Http\Controllers\WaybillController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
-// ========== УДАЛИТЕ ЭТОТ БЛОК - ОН НЕ НУЖЕН ==========
-// header('Access-Control-Allow-Origin: http://localhost:1420');
-// header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-// header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN');
-// header('Access-Control-Allow-Credentials: true');
-// ====================================================
-
 // ========== CSRF ТОКЕН ==========
 Route::get('/csrf-token', function() {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -49,10 +42,11 @@ Route::middleware(['web'])->group(function () {
     Route::post('/waybill/{id}/print', [WaybillController::class, 'printWaybill']);
 });
 
-// ========== НОВЫЕ МАРШРУТЫ ДЛЯ АВТОМАТИЧЕСКИХ ШАБЛОНОВ ==========
+// ========== МАРШРУТЫ ДЛЯ АВТОМАТИЧЕСКИХ ШАБЛОНОВ ==========
 Route::get('/templates/applications', [TemplateController::class, 'getApplications']);
 Route::get('/templates/waybills', [TemplateController::class, 'getWaybills']);
 Route::get('/templates/scan', [TemplateController::class, 'scanTemplates']);
+Route::get('/templates/list', [TemplateController::class, 'getTemplatesList']); // ← только этот маршрут!
 
 // ========== ДОПОЛНИТЕЛЬНЫЕ МАРШРУТЫ ==========
 Route::get('/applications', [DocumentController::class, 'index']);
@@ -60,14 +54,3 @@ Route::post('/waybill/from-application', [WaybillController::class, 'store']);
 Route::get('/waybill/config', [App\Http\Controllers\WaybillConfigController::class, 'getConfig']);
 Route::post('/waybill/save', [WaybillController::class, 'store']);
 Route::get('/waybill/{id}/print', [WaybillController::class, 'printWaybill']);
-Route::get('/templates/list', function () {
-    $path = public_path('templates');
-    if (!is_dir($path)) {
-        return response()->json([]);
-    }
-    $files = glob($path . '/*.html');
-    $names = array_map(function($file) {
-        return basename($file);
-    }, $files);
-    return response()->json($names);
-});

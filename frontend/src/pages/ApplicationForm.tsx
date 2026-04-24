@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '../components/Navbar';
 import { WaybillNewPage } from './WaybillNewPage';
-import { createDocument, getDocumentTypes } from '../services/api';
+import { createDocument } from '../services/api';
 
 interface ApplicationFormProps {
   onBack: () => void;
@@ -17,6 +17,7 @@ interface Template {
   name: string;
   type: 'application' | 'waybill';
   fields: FieldConfig[];
+  html_content?: string;
 }
 
 interface FieldConfig {
@@ -26,49 +27,35 @@ interface FieldConfig {
   required: boolean;
 }
 
-// ========== АВТОМАТИЧЕСКИЕ ФУНКЦИИ ==========
-const getDocumentType = (filename: string, html: string): 'application' | 'waybill' => {
-  const text = (filename + ' ' + html).toLowerCase();
-  if (text.includes('waybill') || text.includes('накладная')) return 'waybill';
-  return 'application';
-};
-
-const detectFieldType = (key: string): string => {
-  const k = key.toLowerCase();
-  if (k.includes('date')) return 'date';
-  if (k.includes('weight') || k.includes('count') || k.includes('sum')) return 'number';
-  if (k.includes('notes') || k.includes('comment')) return 'textarea';
-  return 'text';
-};
-
-const generateLabel = (key: string): string => {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-};
-
-const extractFieldsFromHtml = (html: string): FieldConfig[] => {
-  const pattern = /{{\s*([a-zA-Z_][a-zA-Z0-9_]*)(?:;([^}]*))?\s*}}/g;
-  const fieldsMap = new Map<string, string>();
-  let match;
-  while ((match = pattern.exec(html)) !== null) {
-    const key = match[1];
-    const labelFromHtml = match[2]?.trim();
-    if (!fieldsMap.has(key)) {
-      fieldsMap.set(key, labelFromHtml || generateLabel(key));
+// Функция для получения CSRF токена (если нужно)
+function getCsrfToken(): string {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta) {
+    return meta.getAttribute('content') || '';
+  }
+  const name = 'XSRF-TOKEN';
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === name) {
+      return decodeURIComponent(value);
     }
   }
-  const conditionalPattern = /\{\{#if\s+(\w+)\s*\}\}/g;
-  while ((match = conditionalPattern.exec(html)) !== null) {
-    if (!fieldsMap.has(match[1])) {
-      fieldsMap.set(match[1], generateLabel(match[1]));
-    }
+  return '';
+}
+
+function getHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  const csrfToken = getCsrfToken();
+  if (csrfToken) {
+    headers['X-CSRF-TOKEN'] = csrfToken;
+    headers['X-XSRF-TOKEN'] = csrfToken;
   }
-  return Array.from(fieldsMap.entries()).map(([key, label]) => ({
-    key,
-    label,
-    type: detectFieldType(key),
-    required: true,
-  }));
-};
+  return headers;
+}
 
 function renderTemplate(html: string, data: Record<string, any>, filename: string): string {
   let result = html;
@@ -138,7 +125,6 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
   const [showWaybillModal, setShowWaybillModal] = useState(false);
   const [showWaybillNew, setShowWaybillNew] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
@@ -148,62 +134,48 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
   const loadAllTemplates = async () => {
     setIsLoading(true);
     try {
-      const dbTypes = await getDocumentTypes();
-      const typeMap = new Map<string, number>();
-      dbTypes.forEach((t: any) => {
-        if (t.html_template) typeMap.set(t.html_template, t.id);
+      // Получаем ВСЕ шаблоны (уже с id из БД)
+      const response = await fetch('/templates/list', {
+        headers: getHeaders(),
+        credentials: 'include',
       });
-
-      const files = ['gu27_dt.html', 'keu4_vc_1.html', 'keu4_vc.html'];
       
-      // Словарь русских названий (не меняет HTML)
-      const russianNames: Record<string, string> = {
-        'gu27_dt.html': 'Пересылочная накладная ГУ-27 дт',
-        'keu4_vc_1.html': 'Приемо-сдаточный акт КЭУ-4 ВЦ (1)',
-        'keu4_vc.html': 'Приемо-сдаточный акт КЭУ-4 ВЦ',
-      };
-
+      if (!response.ok) {
+        throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+      }
+      
+      const allTemplates = await response.json();
+      
       const apps: Template[] = [];
       const wbs: Template[] = [];
-
-      for (const filename of files) {
-        const res = await fetch(`/templates/${filename}`);
-        if (!res.ok) continue;
-        const html = await res.text();
-        const fields = extractFieldsFromHtml(html);
-        const docType = getDocumentType(filename, html);
-        
-        let docName = russianNames[filename];
-        if (!docName) {
-          docName = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
-                    html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
-                    filename.replace('.html', '').replace(/_/g, ' ');
+      
+      for (const template of allTemplates) {
+        if (template.type === 'application') {
+          apps.push(template);
+        } else {
+          wbs.push(template);
         }
-
-        const template: Template = {
-          id: typeMap.get(filename) || 0,
-          filename,
-          name: docName,
-          type: docType,
-          fields,
-        };
-        if (docType === 'application') apps.push(template);
-        else wbs.push(template);
       }
-
+      
       setApplications(apps);
       setWaybills(wbs);
+      
       const all = [...apps, ...wbs];
-      if (all.length) {
+      if (all.length > 0) {
         setSelected(all[0]);
         const initial: Record<string, any> = {};
-        all[0].fields.forEach(f => { initial[f.key] = ''; });
+        all[0].fields.forEach((f: FieldConfig) => { initial[f.key] = ''; });
         setFormData(initial);
-        loadHtml(all[0].filename);
+        if (all[0].html_content) {
+          setTemplateHtml(all[0].html_content);
+        } else {
+          loadHtml(all[0].filename);
+        }
         setFormKey(prev => prev + 1);
       }
     } catch (err) {
       console.error('Ошибка загрузки шаблонов:', err);
+      alert('Не удалось загрузить список шаблонов. Проверьте соединение с сервером.');
     } finally {
       setIsLoading(false);
     }
@@ -225,7 +197,11 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     template.fields.forEach(f => { initial[f.key] = ''; });
     setFormData(initial);
     setErrors({});
-    loadHtml(template.filename);
+    if (template.html_content) {
+      setTemplateHtml(template.html_content);
+    } else {
+      loadHtml(template.filename);
+    }
     setFormKey(prev => prev + 1);
   };
 
