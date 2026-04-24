@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовая заявка</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; background: white; padding: 40px; }
+        .document { max-width: 600px; margin: 0 auto; border: 1px solid #ccc; padding: 30px; }
+        .header { text-align: center; border-bottom: 2px solid #7C5CFC; padding-bottom: 15px; margin-bottom: 25px; }
+        .header h1 { font-size: 22px; text-transform: uppercase; color: #7C5CFC; }
+        .field-row { display: flex; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
+        .field-label { width: 150px; font-weight: bold; }
+        .field-value { flex: 1; }
+        .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <h1>ТЕСТОВАЯ ЗАЯВКА</h1>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Номер заявки:</div>
+            <div class="field-value">{{ request_number }}</div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Дата:</div>
+            <div class="field-value">{{ request_date }}</div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Описание:</div>
+            <div class="field-value">{{ request_description }}</div>
+        </div>
+        <div class="footer">Тестовая заявка</div>
+    </div>
+</body>
+</html>

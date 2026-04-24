@@ -1,8 +1,7 @@
 // pages/WaybillNewPage.tsx
 import { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
-import { WaybillForm } from './WaybillForm';
-import { getDocumentTypes, getTemplatesList, getDocuments } from '../services/api';
+import { getTemplatesList, getDocumentTypes, getDocuments } from '../services/api';
 
 interface WaybillNewPageProps {
   onBack: () => void;
@@ -18,46 +17,12 @@ interface WaybillNewPageProps {
   };
 }
 
-interface Template {
+interface WaybillTemplate {
   id: number;
   filename: string;
   name: string;
-  fields: any[];
   html_content: string;
 }
-
-// Определение, является ли документ накладной
-const isWaybill = (filename: string, html: string): boolean => {
-  const text = (filename + ' ' + html).toLowerCase();
-  return text.includes('waybill') || text.includes('накладная');
-};
-
-// Извлечение полей из HTML (поддерживает {{ field }} и {{ field;label }})
-const extractFieldsFromHtml = (html: string): any[] => {
-  const pattern = /{{\s*([a-zA-Z_][a-zA-Z0-9_]*)(?:;([^}]*))?\s*}}/g;
-  const fieldsMap = new Map();
-  let match;
-  while ((match = pattern.exec(html)) !== null) {
-    const key = match[1];
-    const label = match[2]?.trim() || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    if (!fieldsMap.has(key)) {
-      fieldsMap.set(key, { key, label, type: 'text', required: true });
-    }
-  }
-  // Условные блоки
-  const conditionalPattern = /\{\{#if\s+(\w+)\s*\}\}/g;
-  while ((match = conditionalPattern.exec(html)) !== null) {
-    if (!fieldsMap.has(match[1])) {
-      fieldsMap.set(match[1], {
-        key: match[1],
-        label: match[1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        type: 'text',
-        required: false,
-      });
-    }
-  }
-  return Array.from(fieldsMap.values());
-};
 
 export function WaybillNewPage({
   onBack,
@@ -67,29 +32,25 @@ export function WaybillNewPage({
   userName,
   initialWaybillData,
 }: WaybillNewPageProps) {
-  const [option, setOption] = useState(initialWaybillData?.option || '');
-  const [waybillType, setWaybillType] = useState(initialWaybillData?.waybillType || '');
-  const [selectedFormType, setSelectedFormType] = useState<string>('wagon');
-  const [showModal, setShowModal] = useState(false);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
-  const [loadingApps, setLoadingApps] = useState(false);
-  const [waybillTemplates, setWaybillTemplates] = useState<Template[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [initialFormData, setInitialFormData] = useState<Record<string, any>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const savedApplicationData = initialWaybillData?.formData || null;
+  const savedApplicationName = initialWaybillData?.template?.name || '';
 
-  const optionOptions = [
-    { value: 'gu12', label: 'По заявке на перевозку грузов ГУ-12' },
-    { value: 'gu13', label: 'По распоряжению о внутрихозяйственных перевозках ГУ-13' },
-  ];
+  const [waybillTemplates, setWaybillTemplates] = useState<WaybillTemplate[]>([]);
+  const [selectedWaybillTemplate, setSelectedWaybillTemplate] = useState<WaybillTemplate | null>(null);
+  const [waybillType, setWaybillType] = useState(initialWaybillData?.waybillType || '');
+  const [waybillForm, setWaybillForm] = useState(''); // ← для формы накладной (с дашборда)
+  const [showModal, setShowModal] = useState(false);
+  const [savedApplications, setSavedApplications] = useState<any[]>([]);
+  const [selectedSavedApplication, setSelectedSavedApplication] = useState<any | null>(null);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const typeOptions = [
     { value: '90', label: '90 - Универсальный перевозочный документ' },
     { value: '94', label: '94 - Универсальный перевозочный документ' },
   ];
 
+  // Опции для формы накладной (только для дашборда)
   const formTypeOptions = [
     { value: 'wagon', label: 'Повагонная' },
     { value: 'group', label: 'Групповая' },
@@ -98,10 +59,10 @@ export function WaybillNewPage({
   ];
 
   useEffect(() => {
-    loadWaybillTemplates();
+    loadWaybillTemplatesForStyle();
   }, []);
 
-  const loadWaybillTemplates = async () => {
+  const loadWaybillTemplatesForStyle = async () => {
     setIsLoading(true);
     try {
       const files = await getTemplatesList();
@@ -111,202 +72,132 @@ export function WaybillNewPage({
         if (t.html_template) typeMap.set(t.html_template, t.id);
       });
 
-      const waybills: Template[] = [];
+      const waybills: WaybillTemplate[] = [];
 
-      for (const filename of files) {
+      for (const item of files) {
+        const filename = String(item);
+        if (!filename) continue;
+        
         const res = await fetch(`/templates/${filename}`);
         if (!res.ok) continue;
         const html = await res.text();
-        if (!isWaybill(filename, html)) continue;
+        
+        const isWaybill = filename.toLowerCase().includes('waybill') || html.toLowerCase().includes('накладная');
+        if (!isWaybill) continue;
 
-        const fields = extractFieldsFromHtml(html);
-        const docName =
-          html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
-          html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
-          filename.replace('.html', '').replace(/_/g, ' ');
+        const docName = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
+                        html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
+                        filename.replace('.html', '').replace(/_/g, ' ');
 
         waybills.push({
           id: typeMap.get(filename) || 0,
-          filename,
+          filename: filename,
           name: docName,
-          fields,
           html_content: html,
         });
       }
 
       setWaybillTemplates(waybills);
-      if (waybills.length > 0 && !selectedTemplate) {
-        setSelectedTemplate(waybills[0]);
-        setSelectedFormType(getFormTypeFromFilename(waybills[0].filename));
+      if (waybills.length > 0 && !selectedWaybillTemplate) {
+        setSelectedWaybillTemplate(waybills[0]);
       }
-    } catch (error) {
-      console.error('Ошибка загрузки накладных:', error);
+    } catch (err) {
+      console.error('Ошибка загрузки накладных:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (fromApplication && option) {
-      loadApplications();
-    }
-  }, [option]);
-
-  const loadApplications = async () => {
+  const loadSavedApplications = async () => {
     setLoadingApps(true);
     try {
       const allDocs = await getDocuments();
       const userDocs = allDocs.filter((doc: any) => doc.user_id === userId);
-      const filtered = userDocs.filter((doc: any) => {
-        if (option === 'gu12' && doc.document_type_id === 1) return true;
-        if (option === 'gu13' && doc.document_type_id === 2) return true;
-        return false;
-      });
-      setApplications(filtered);
+      setSavedApplications(userDocs);
     } catch (error) {
-      console.error('Ошибка загрузки заявок:', error);
+      console.error('Ошибка загрузки сохранённых заявок:', error);
     } finally {
       setLoadingApps(false);
     }
   };
 
-  const getFormTypeFromFilename = (filename: string): string => {
-    if (filename.includes('container_set')) return 'container_set';
-    if (filename.includes('container')) return 'container';
-    if (filename.includes('group')) return 'group';
-    return 'wagon';
-  };
-
-  const handleOptionChangeForApplication = (value: string) => {
-    setOption(value);
-    setShowModal(true);
-  };
-
-  const handleModalAccept = () => {
-    if (!selectedApplication) {
-      alert('Выберите заявку');
-      return;
-    }
-
-    let formData = selectedApplication.form_data;
-    if (typeof formData === 'string') {
-      try {
-        formData = JSON.parse(formData);
-      } catch {
-        formData = {};
-      }
-    }
-
-    const defaultTemplate = waybillTemplates.find(t => t.filename.includes('wagon'));
-    if (defaultTemplate) {
-      setSelectedTemplate(defaultTemplate);
-      setSelectedFormType(getFormTypeFromFilename(defaultTemplate.filename));
-    }
-
-    setInitialFormData(formData);
-    setShowModal(false);
-    setShowForm(true);
-  };
-
-  const handleModalCancel = () => {
-    setShowModal(false);
-    setOption('');
-    setSelectedApplication(null);
-  };
-
-  const handleContinueFromDashboard = () => {
-    if (!option) {
-      alert('Выберите вариант оформления');
+  const handleContinue = () => {
+    if (!selectedWaybillTemplate) {
+      alert('Выберите вариант оформления (накладную для стиля)');
       return;
     }
     if (!waybillType) {
       alert('Выберите тип накладной');
       return;
     }
-    if (!selectedFormType) {
+    // Только если НЕ из заявки – проверяем форму накладной
+    if (!fromApplication && !waybillForm) {
       alert('Выберите форму накладной');
       return;
     }
-
-    const template = waybillTemplates.find(t => 
-      (selectedFormType === 'wagon' && t.filename.includes('wagon')) ||
-      (selectedFormType === 'group' && t.filename.includes('group')) ||
-      (selectedFormType === 'container' && t.filename.includes('container') && !t.filename.includes('container_set')) ||
-      (selectedFormType === 'container_set' && t.filename.includes('container_set'))
-    );
-
-    if (template) {
-      setSelectedTemplate(template);
-      setSelectedFormType(getFormTypeFromFilename(template.filename));
-    } else if (waybillTemplates.length > 0) {
-      setSelectedTemplate(waybillTemplates[0]);
-      setSelectedFormType(getFormTypeFromFilename(waybillTemplates[0].filename));
-    } else {
-      alert('Нет доступных шаблонов накладных');
-      return;
-    }
-
-    setShowForm(true);
+    loadSavedApplications();
+    setShowModal(true);
   };
 
-  const handleContinueFromApplication = () => {
-    if (!option) {
-      alert('Выберите вариант оформления');
+  const handleConfirm = () => {
+    if (!selectedWaybillTemplate) {
+      alert('Ошибка: не выбран вариант оформления');
       return;
     }
-    if (!waybillType) {
-      alert('Выберите тип накладной');
-      return;
-    }
-    if (waybillTemplates.length > 0) {
-      setSelectedTemplate(waybillTemplates[0]);
-      setShowForm(true);
+    
+    let sourceData = null;
+    let sourceName = '';
+    
+    if (fromApplication && savedApplicationData) {
+      sourceData = savedApplicationData;
+      sourceName = savedApplicationName;
+    } else if (selectedSavedApplication) {
+      let formData = selectedSavedApplication.form_data;
+      if (typeof formData === 'string') {
+        try { formData = JSON.parse(formData); } catch { formData = {}; }
+      }
+      sourceData = formData;
+      sourceName = selectedSavedApplication.form_data?.document_type_name || 'Заявка';
+    } else if (fromApplication) {
+      sourceData = {};
+      sourceName = savedApplicationName || 'Заявка';
     } else {
-      alert('Нет доступных шаблонов накладных');
+      alert('Выберите сохранённую заявку (откуда взять данные)');
+      return;
     }
+    
+    // Передаём параметры
+    const params = new URLSearchParams();
+    params.set('waybillFile', selectedWaybillTemplate.filename);
+    params.set('waybillType', waybillType);
+    params.set('sourceData', JSON.stringify(sourceData));
+    params.set('sourceName', sourceName);
+    
+    // Если выбрана форма накладной (с дашборда) – передаём
+    if (!fromApplication && waybillForm) {
+      params.set('waybillForm', waybillForm);
+    }
+    
+    window.location.href = `/waybill-form-auto?${params.toString()}`;
   };
-
-  if (showForm && selectedTemplate) {
-    return (
-      <WaybillForm
-        onBack={() => setShowForm(false)}
-        onLogout={onLogout}
-        userId={userId}
-        option={option}
-        type={waybillType}
-        form={selectedFormType}
-        documentTypeId={selectedTemplate.id}
-        fieldsConfig={selectedTemplate.fields}
-        htmlTemplate={selectedTemplate.html_content}
-        initialData={initialFormData}
-        userName={userName}
-      />
-    );
-  }
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#E4E9F8] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#2860F0] mb-4"></div>
-          <p className="text-gray-600">Загрузка накладных...</p>
-        </div>
+        <div className="text-center">Загрузка...</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#E4E9F8]">
-      <Navbar hideMinimize={true} userName={userName} title="Оформление железнодорожной накладной" />
+      <Navbar hideMinimize userName={userName} title="Оформление железнодорожной накладной" />
 
       <div className="absolute top-4 right-6 z-10 flex gap-3">
-        <button onClick={onBack} className="px-4 py-2 bg-[#3ABC96] hover:bg-[#1e4bc2] text-white font-medium rounded-lg shadow-md flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+        <button onClick={onBack} className="px-4 py-2 bg-[#3ABC96] hover:bg-[#1e4bc2] text-white rounded-lg shadow-md">
           В начало
         </button>
-        <button onClick={onLogout} className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg shadow-md">
+        <button onClick={onLogout} className="px-4 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white rounded-lg shadow-md">
           Выход
         </button>
       </div>
@@ -316,28 +207,28 @@ export function WaybillNewPage({
           <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Сведения о перевозочном документе</h2>
 
           <div className="space-y-4">
+            {/* Поле 1: Вариант оформления (всегда) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Вариант оформления <span className="text-red-500">*</span>
               </label>
               <select
-                value={option}
+                value={selectedWaybillTemplate?.filename || ''}
                 onChange={(e) => {
-                  if (fromApplication) {
-                    handleOptionChangeForApplication(e.target.value);
-                  } else {
-                    setOption(e.target.value);
-                  }
+                  const waybill = waybillTemplates.find(w => w.filename === e.target.value);
+                  setSelectedWaybillTemplate(waybill || null);
                 }}
-                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg"
               >
-                <option value="">Выберите вариант</option>
-                {optionOptions.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                <option value="">Выберите накладную (отсюда возьмётся оформление)</option>
+                {waybillTemplates.map(waybill => (
+                  <option key={waybill.filename} value={waybill.filename}>{waybill.name}</option>
                 ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">Отсюда будет взято оформление документа (стили, верстка)</p>
             </div>
 
+            {/* Поле 2: Тип накладной (всегда) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Тип накладной <span className="text-red-500">*</span>
@@ -345,7 +236,7 @@ export function WaybillNewPage({
               <select
                 value={waybillType}
                 onChange={(e) => setWaybillType(e.target.value)}
-                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+                className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg"
               >
                 <option value="">Выберите тип</option>
                 {typeOptions.map(t => (
@@ -354,30 +245,32 @@ export function WaybillNewPage({
               </select>
             </div>
 
+            {/* Поле 3: Форма накладной (ТОЛЬКО если НЕ из заявки) */}
             {!fromApplication && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Форма накладной <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={selectedFormType}
-                  onChange={(e) => setSelectedFormType(e.target.value)}
-                  className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg text-gray-900 focus:outline-none focus:shadow-[0_0_10px_0_#3300FF]"
+                  value={waybillForm}
+                  onChange={(e) => setWaybillForm(e.target.value)}
+                  className="w-full px-4 py-2 bg-[#E4E0FF] border border-[#919191] rounded-lg"
                 >
                   <option value="">Выберите форму</option>
                   {formTypeOptions.map(f => (
                     <option key={f.value} value={f.value}>{f.label}</option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-1">Выберите тип отправки груза</p>
               </div>
             )}
           </div>
 
           <div className="mt-6 flex justify-end">
             <button
-              onClick={fromApplication ? handleContinueFromApplication : handleContinueFromDashboard}
-              disabled={!option || !waybillType || (!fromApplication && !selectedFormType)}
-              className="px-6 py-2 bg-[#4475F7] hover:bg-[#3662d9] disabled:bg-gray-400 text-white font-medium rounded-lg"
+              onClick={handleContinue}
+              disabled={!selectedWaybillTemplate || !waybillType || (!fromApplication && !waybillForm)}
+              className="px-6 py-2 bg-[#4475F7] hover:bg-[#3662d9] disabled:bg-gray-400 text-white rounded-lg"
             >
               Продолжить
             </button>
@@ -385,49 +278,62 @@ export function WaybillNewPage({
         </div>
       </div>
 
-      {showModal && fromApplication && (
+      {/* Модальное окно выбора сохранённой заявки */}
+      {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="w-[500px] rounded-2xl shadow-xl p-6" style={{ backgroundColor: '#6990F5', border: '1px solid #C9D9FF' }}>
-            <div className="-mt-6 -mx-6 mb-4 px-6 py-3 rounded-t-2xl" style={{ backgroundColor: '#C9D9FF' }}>
-              <h3 className="text-lg font-semibold text-center" style={{ color: '#2860F0' }}>Выбор заявки</h3>
-            </div>
+          <div className="w-[500px] bg-[#6990F5] rounded-lg p-6 border border-white">
+            <h3 className="text-lg font-semibold text-white text-center mb-4">Выбор источника данных</h3>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white mb-1">
-                  Сохранённые заявки <span className="text-red-300">*</span>
+                  Сохранённые заявки {!fromApplication && <span className="text-red-300">*</span>}
                 </label>
                 {loadingApps ? (
                   <p className="text-gray-200">Загрузка...</p>
-                ) : applications.length === 0 ? (
+                ) : savedApplications.length === 0 ? (
                   <div className="text-center p-4 bg-yellow-100 rounded-lg text-yellow-800">
-                    <p>Нет заявок данного типа.</p>
-                    <p className="text-sm mt-2">Сначала создайте заявку ГУ-12 или ГУ-13.</p>
+                    <p>Нет сохранённых заявок.</p>
+                    {fromApplication && <p className="text-sm mt-2">Будут использованы данные текущей заявки</p>}
+                    {!fromApplication && <p className="text-sm mt-2">Сначала создайте заявку</p>}
                   </div>
                 ) : (
                   <select
-                    value={selectedApplication?.id || ''}
+                    value={selectedSavedApplication?.id || ''}
                     onChange={(e) => {
-                      const app = applications.find(a => a.id === Number(e.target.value));
-                      setSelectedApplication(app || null);
+                      const app = savedApplications.find(a => a.id === Number(e.target.value));
+                      setSelectedSavedApplication(app || null);
                     }}
-                    className="w-full px-4 py-2 rounded-lg focus:outline-none"
-                    style={{ backgroundColor: '#C9D9FF', border: '1.5px solid #FFFEFE', color: '#000' }}
+                    className="w-full px-4 py-2 bg-[#C9D9FF] rounded-lg text-gray-900"
                   >
                     <option value="">Выберите заявку</option>
-                    {applications.map(app => (
+                    {savedApplications.map(app => (
                       <option key={app.id} value={app.id}>
                         №{app.id} – {new Date(app.created_at).toLocaleDateString()}
                       </option>
                     ))}
                   </select>
                 )}
+                <p className="text-xs text-white mt-1">
+                  {fromApplication 
+                    ? "Если не выбрано – будут использованы данные текущей заявки"
+                    : "Отсюда будут взяты заполненные данные для накладной"
+                  }
+                </p>
               </div>
             </div>
+
             <div className="flex gap-3 mt-6">
-              <button onClick={handleModalAccept} className="flex-1 py-2 bg-[#3ABC96] hover:bg-[#32a07e] text-white font-medium rounded-lg border border-white">
-                Принять
+              <button
+                onClick={handleConfirm}
+                className="flex-1 py-2 bg-[#3ABC96] text-white rounded-lg border border-white"
+              >
+                Принять и продолжить
               </button>
-              <button onClick={handleModalCancel} className="flex-1 py-2 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg border border-white">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 py-2 bg-[#E36756] text-white rounded-lg border border-white"
+              >
                 Отмена
               </button>
             </div>

@@ -328,7 +328,31 @@ export async function getTemplatesList(): Promise<string[]> {
     headers: getHeaders(),
     credentials: 'include',
   });
-  return handleResponse(response);
+  const data = await handleResponse(response);
+  
+  // Если data уже массив строк – возвращаем его
+  if (Array.isArray(data) && data.length > 0) {
+    // Если первый элемент – строка, значит это уже список имён
+    if (typeof data[0] === 'string') {
+      return data;
+    }
+    // Если первый элемент – объект с полем filename, извлекаем filename
+    if (typeof data[0] === 'object' && data[0].filename) {
+      return data.map((item: any) => item.filename);
+    }
+    // Если первый элемент – объект с полем name, извлекаем name (как имя файла?)
+    if (typeof data[0] === 'object' && data[0].name) {
+      return data.map((item: any) => item.name);
+    }
+  }
+  
+  // Если data вообще не массив – возвращаем пустой массив
+  if (!Array.isArray(data)) {
+    console.warn('getTemplatesList: ответ не является массивом', data);
+    return [];
+  }
+  
+  return data;
 }
 
 // ========== ПРИНУДИТЕЛЬНЫЙ ВЫХОД ==========
@@ -343,6 +367,15 @@ export async function forceLogoutAndReset(): Promise<void> {
     console.log('Ошибка при выходе:', e);
   }
   await fetchCsrfToken();
+}
+export async function createDocumentType(data: any): Promise<any> {
+  const response = await fetch(`${API_BASE_URL}/document-types`, {
+    method: 'POST',
+    headers: getHeaders(),
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  return handleResponse(response);
 }
 
 // ========== ЭКСПОРТ ВСЕХ ФУНКЦИЙ ==========

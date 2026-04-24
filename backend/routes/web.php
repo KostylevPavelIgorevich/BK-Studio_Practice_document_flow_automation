@@ -36,6 +36,7 @@ Route::middleware(['web'])->group(function () {
     Route::resource('documents', DocumentController::class);
     Route::post('/documents/{id}/print', [DocumentController::class, 'printDocument']);
     Route::get('/document-types', [DocumentTypeController::class, 'index']);
+    Route::post('/document-types', [DocumentTypeController::class, 'store']); // ← ДОБАВЛЕН!
     Route::get('/document-types/{code}/fields', [DocumentTypeController::class, 'getFields']);
     Route::post('/waybill', [WaybillController::class, 'store']);
     Route::post('/waybill/{id}/save', [WaybillController::class, 'save']);
@@ -46,7 +47,7 @@ Route::middleware(['web'])->group(function () {
 Route::get('/templates/applications', [TemplateController::class, 'getApplications']);
 Route::get('/templates/waybills', [TemplateController::class, 'getWaybills']);
 Route::get('/templates/scan', [TemplateController::class, 'scanTemplates']);
-Route::get('/templates/list', [TemplateController::class, 'getTemplatesList']); // ← только этот маршрут!
+Route::get('/templates/list', [TemplateController::class, 'getTemplatesList']);
 
 // ========== ДОПОЛНИТЕЛЬНЫЕ МАРШРУТЫ ==========
 Route::get('/applications', [DocumentController::class, 'index']);

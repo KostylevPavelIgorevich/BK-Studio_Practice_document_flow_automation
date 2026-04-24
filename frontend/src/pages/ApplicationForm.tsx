@@ -226,31 +226,39 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     return !hasError;
   };
 
-  const handleSave = async () => {
-    if (!selected) return;
-    if (!validate()) {
-      alert('Исправьте ошибки в форме');
-      return;
+ const handleSave = async () => {
+  if (!selected) return;
+  if (!validate()) {
+    alert('Исправьте ошибки в форме');
+    return;
+  }
+  if (!selected.id) {
+    alert('Тип документа не зарегистрирован в системе. Обратитесь к администратору.');
+    return;
+  }
+  
+  // Фильтруем ТОЛЬКО те поля, которые есть в selected.fields
+  const filteredFormData: Record<string, any> = {};
+  selected.fields.forEach(field => {
+    if (formData[field.key] !== undefined && formData[field.key] !== null && formData[field.key] !== '') {
+      filteredFormData[field.key] = formData[field.key];
     }
-    if (!selected.id) {
-      alert('Тип документа не зарегистрирован в системе. Обратитесь к администратору.');
-      return;
-    }
-    try {
-      await createDocument(selected.id, {
-        ...formData,
-        template_name: selected.filename,
-        document_type_name: selected.name,
-      });
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
-      alert('✅ Документ сохранён');
-    } catch (err) {
-      console.error(err);
-      alert('Ошибка сохранения');
-    }
-  };
-
+  });
+  
+  try {
+    await createDocument(selected.id, {
+      ...filteredFormData,
+      template_name: selected.filename,
+      document_type_name: selected.name,
+    });
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+    alert('✅ Документ сохранён');
+  } catch (err) {
+    console.error(err);
+    alert('Ошибка сохранения');
+  }
+};
   useEffect(() => {
     if (!selected || !templateHtml || !iframeRef.current) return;
     const rendered = renderTemplate(templateHtml, formData, selected.filename);
