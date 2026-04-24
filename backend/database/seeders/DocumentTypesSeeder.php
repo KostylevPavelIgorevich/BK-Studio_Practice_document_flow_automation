@@ -10,67 +10,25 @@ class DocumentTypesSeeder extends Seeder
     public function run(): void
     {
         $documentTypes = [
-            // Заявки и уведомления
-            [
-                'code' => 'gu12',
-                'name' => 'Заявка на перевозку грузов ГУ-12',
-                'html_template' => 'gu12.html',
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'gu27',
-                'name' => 'Пересылочная накладная ГУ-27 дт',
-                'html_template' => 'gu27_new.html',   // убедитесь, что файл существует
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'gu2b',
-                'name' => 'Уведомление о передаче вагонов ГУ-2б',
-                'html_template' => 'gu2b.html',
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'gu36',
-                'name' => 'Уведомление о прибытии ГУ-36',
-                'html_template' => 'gu36.html',
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'lu59',
-                'name' => 'Ярлык на прием багажа ЛУ-59',
-                'html_template' => 'lu59.html',
-                'fields_config' => null,
-            ],
+            // ... (существующие записи, которые у вас уже есть) ...
 
-            // Накладные (waybill)
+            // НОВЫЕ записи для ваших файлов
             [
-                'code' => 'waybill',
-                'name' => 'Накладная на перевозку груза (базовая)',
-                'html_template' => 'waybill.html',
+                'code' => 'gu27_dt',
+                'name' => 'Пересылочная накладная ГУ-27 дт',
+                'html_template' => 'gu27_dt.html',
                 'fields_config' => null,
             ],
             [
-                'code' => 'waybill_wagon',
-                'name' => 'Накладная на перевозку груза (повагонная)',
-                'html_template' => 'waybill_wagon.html',
+                'code' => 'keu4_vc',
+                'name' => 'Приемо-сдаточный акт КЭУ-4 ВЦ',
+                'html_template' => 'keu4_vc.html',
                 'fields_config' => null,
             ],
             [
-                'code' => 'waybill_group',
-                'name' => 'Накладная на перевозку груза (групповая)',
-                'html_template' => 'waybill_group.html',
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'waybill_container',
-                'name' => 'Накладная на перевозку груза (контейнерная)',
-                'html_template' => 'waybill_container.html',
-                'fields_config' => null,
-            ],
-            [
-                'code' => 'waybill_container_set',
-                'name' => 'Накладная на перевозку груза (контейнерная комплектом)',
-                'html_template' => 'waybill_container_set.html',
+                'code' => 'keu4_vc_1',
+                'name' => 'Приемо-сдаточный акт КЭУ-4 ВЦ (1)',
+                'html_template' => 'keu4_vc_1.html',
                 'fields_config' => null,
             ],
         ];

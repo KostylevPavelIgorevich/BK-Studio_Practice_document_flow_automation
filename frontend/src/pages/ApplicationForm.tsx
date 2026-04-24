@@ -138,8 +138,7 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
   const [showWaybillModal, setShowWaybillModal] = useState(false);
   const [showWaybillNew, setShowWaybillNew] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
-  // Принудительная перерисовка формы при смене шаблона
+
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
@@ -155,8 +154,15 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
         if (t.html_template) typeMap.set(t.html_template, t.id);
       });
 
-      // Список ваших файлов
       const files = ['gu27_dt.html', 'keu4_vc_1.html', 'keu4_vc.html'];
+      
+      // Словарь русских названий (не меняет HTML)
+      const russianNames: Record<string, string> = {
+        'gu27_dt.html': 'Пересылочная накладная ГУ-27 дт',
+        'keu4_vc_1.html': 'Приемо-сдаточный акт КЭУ-4 ВЦ (1)',
+        'keu4_vc.html': 'Приемо-сдаточный акт КЭУ-4 ВЦ',
+      };
+
       const apps: Template[] = [];
       const wbs: Template[] = [];
 
@@ -166,9 +172,13 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
         const html = await res.text();
         const fields = extractFieldsFromHtml(html);
         const docType = getDocumentType(filename, html);
-        const docName = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
-                        html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
-                        filename.replace('.html', '').replace(/_/g, ' ');
+        
+        let docName = russianNames[filename];
+        if (!docName) {
+          docName = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ||
+                    html.match(/<h1[^>]*>([^<]+)<\/h1>/i)?.[1] ||
+                    filename.replace('.html', '').replace(/_/g, ' ');
+        }
 
         const template: Template = {
           id: typeMap.get(filename) || 0,
@@ -216,7 +226,7 @@ export function ApplicationForm({ onBack, onLogout, userName, userId }: Applicat
     setFormData(initial);
     setErrors({});
     loadHtml(template.filename);
-    setFormKey(prev => prev + 1); // принудительный перерендер полей
+    setFormKey(prev => prev + 1);
   };
 
   const validate = () => {
