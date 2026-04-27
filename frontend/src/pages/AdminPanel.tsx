@@ -92,7 +92,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     return sortUsersAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
   });
 
-  // ========== ВАЛИДАЦИЯ ==========
+  
   const validateGroupName = (name: string): string | null => {
     if (!name.trim()) return 'Название группы не может быть пустым';
     if (!/^[а-яА-Яa-zA-Z0-9\s\-]+$/.test(name)) {
@@ -117,7 +117,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     return null;
   };
 
-  // ========== ГРУППЫ ==========
+ 
   const handleCreateGroup = () => { setNewGroupName(''); setIsCreateGroupModalOpen(true); };
  const handleAcceptCreateGroup = async () => {
   const error = validateGroupName(newGroupName);
@@ -158,14 +158,14 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     } catch (error) { alert('Ошибка при изменении группы'); }
   };
 
-  // Обработчик двойного клика по группе – показывает пользователей под списком групп
+
   const handleGroupDoubleClick = (group: any) => {
     const usersInGroup = users.filter(u => u.group_id === group.id);
     setSelectedGroupForUsers(group);
     setGroupUsersList(usersInGroup);
   };
 
-  // ========== ПОЛЬЗОВАТЕЛИ ==========
+
 const handleCreateUser = () => {
   setNewUser({
     login: '',
@@ -252,7 +252,7 @@ const handleAcceptCreateUser = async () => {
     } catch (error: any) { alert(error.message || 'Ошибка обновления'); }
   };
 
-  // ========== ДОКУМЕНТЫ ==========
+
   const handleDoubleClickUser = (userId: number, fullName: string) => {
     setSelectedUserId(userId);
     setSelectedUserName(fullName);

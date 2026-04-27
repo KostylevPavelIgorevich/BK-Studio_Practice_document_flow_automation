@@ -14,8 +14,14 @@ interface DocumentsProps {
 interface DocumentType {
   id: number;
   name: string;
-  fields_config: any[];
+  // fields_config может быть null или массивом
+  fields_config?: any[] | null;
 }
+
+// Вспомогательная функция для преобразования ключа в читаемую метку
+const formatLabel = (key: string): string => {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
 
 export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,10 +39,13 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
       types.forEach((type: any) => {
         let fieldsConfig = type.fields_config;
         if (typeof fieldsConfig === 'string') {
-          try { fieldsConfig = JSON.parse(fieldsConfig); } catch(e) { fieldsConfig = []; }
+          try { fieldsConfig = JSON.parse(fieldsConfig); } catch(e) { fieldsConfig = null; }
         }
-        if (!Array.isArray(fieldsConfig)) fieldsConfig = [];
-        map.set(type.id, { ...type, fields_config: fieldsConfig });
+        map.set(type.id, { 
+          id: type.id, 
+          name: type.name, 
+          fields_config: fieldsConfig || null 
+        });
       });
       setDocumentTypes(map);
     } catch (error) {
@@ -75,10 +84,38 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
     return documentTypes.get(typeId)?.name || 'Документ';
   };
 
-  const getFieldsConfig = (typeId: number): any[] => {
+  // Получение полей для отображения – сначала пробуем fields_config, если есть, иначе извлекаем из form_data
+  const getDisplayFields = (doc: any) => {
+    const typeId = doc.document_type_id;
     const type = documentTypes.get(typeId);
-    if (!type) return [];
-    return Array.isArray(type.fields_config) ? type.fields_config : [];
+    let fieldsConfig = type?.fields_config;
+    let formData = doc.form_data;
+    if (typeof formData === 'string') {
+      try { formData = JSON.parse(formData); } catch(e) { formData = {}; }
+    }
+    if (!formData || typeof formData !== 'object') formData = {};
+
+    // Если есть fields_config в БД (не null) – используем его для фильтрации и порядка
+    if (fieldsConfig && Array.isArray(fieldsConfig) && fieldsConfig.length > 0) {
+      return fieldsConfig
+        .filter(f => formData[f.key] !== undefined && formData[f.key] !== null && formData[f.key] !== '')
+        .map(f => ({
+          key: f.key,
+          label: f.label || formatLabel(f.key),
+          value: f.type === 'date' && formData[f.key] ? new Date(formData[f.key]).toLocaleDateString('ru-RU') : formData[f.key],
+          type: f.type,
+        }));
+    } else {
+      // Если fields_config нет – показываем все поля из form_data
+      return Object.entries(formData)
+        .filter(([_, val]) => val !== undefined && val !== null && val !== '')
+        .map(([key, val]) => ({
+          key,
+          label: formatLabel(key),
+          value: String(val),
+          type: 'text',
+        }));
+    }
   };
 
   const filteredDocs = documents.filter(doc =>
@@ -111,22 +148,12 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
 
   const handlePrint = () => {
     if (!selectedDocument) return;
-    const typeId = selectedDocument.document_type_id;
-    const typeName = getTypeName(typeId);
-    let formData = selectedDocument.form_data;
-    if (typeof formData === 'string') {
-      try { formData = JSON.parse(formData); } catch(e) { formData = {}; }
-    }
-    if (!formData || typeof formData !== 'object') formData = {};
-    const fieldsConfig = getFieldsConfig(typeId);
-    const filledFields = fieldsConfig.filter(field => {
-      const value = formData[field.key];
-      return value !== undefined && value !== null && value !== '';
-    });
-    const fieldsHtml = filledFields.map(field => `
+    const typeName = getTypeName(selectedDocument.document_type_id);
+    const fields = getDisplayFields(selectedDocument);
+    const fieldsHtml = fields.map(f => `
       <div class="info-row">
-        <div class="info-label">${field.label}:</div>
-        <div class="info-value">${field.type === 'date' ? new Date(formData[field.key]).toLocaleDateString('ru-RU') : formData[field.key]}</div>
+        <div class="info-label">${f.label}:</div>
+        <div class="info-value">${f.value}</div>
       </div>
     `).join('');
     const printHtml = `
@@ -234,22 +261,13 @@ export function Documents({ userName, userId, onBack, onLogout }: DocumentsProps
                   <span className="text-sm text-[#434343] font-medium mb-3 block">Данные документа:</span>
                   <div className="space-y-2">
                     {(() => {
-                      let formData = selectedDocument.form_data;
-                      if (typeof formData === 'string') {
-                        try { formData = JSON.parse(formData); } catch(e) { formData = {}; }
-                      }
-                      if (!formData || typeof formData !== 'object') formData = {};
-                      const fieldsConfig = getFieldsConfig(selectedDocument.document_type_id);
-                      const filledFields = Array.isArray(fieldsConfig) ? fieldsConfig.filter(f => {
-                        const val = formData[f.key];
-                        return val !== undefined && val !== null && val !== '';
-                      }) : [];
-                      if (filledFields.length === 0) return <div className="text-center text-gray-400 py-4">Нет данных</div>;
-                      return filledFields.map(field => (
+                      const fields = getDisplayFields(selectedDocument);
+                      if (fields.length === 0) return <div className="text-center text-gray-400 py-4">Нет данных</div>;
+                      return fields.map(field => (
                         <div key={field.key} className="flex py-2 border-b border-[#C9D9FF] last:border-0">
                           <div className="w-44 font-medium text-[#434343] text-sm">{field.label}:</div>
                           <div className="flex-1 text-gray-800 text-sm break-words">
-                            {field.type === 'date' ? new Date(formData[field.key]).toLocaleDateString('ru-RU') : String(formData[field.key])}
+                            {field.value}
                           </div>
                         </div>
                       ));

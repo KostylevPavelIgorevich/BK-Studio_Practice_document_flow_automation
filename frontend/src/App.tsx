@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Login } from './pages/Login';
 import { AdminPanel } from './pages/AdminPanel';
 import { UserDashboard } from './pages/UserDashboard';
+import { WaybillFormAuto } from './pages/WaybillFormAuto';
 import { login as apiLogin, fetchCsrfToken } from './services/api';
 import './app.css';
 
@@ -12,12 +13,10 @@ function App() {
   const [userId, setUserId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Проверка сохранённых данных при загрузке + получение CSRF токена
   useEffect(() => {
     const initApp = async () => {
       setIsLoading(true);
       
-      // 1. Получаем CSRF токен при старте приложения (ВАЖНО!)
       try {
         await fetchCsrfToken();
         console.log('✅ CSRF токен получен');
@@ -25,12 +24,10 @@ function App() {
         console.error('❌ Ошибка получения CSRF токена:', error);
       }
       
-      // 2. Проверяем сохранённого пользователя
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
-          // Проверяем, что данные не устарели (можно добавить проверку токена)
           if (user.id && user.role) {
             setUserId(user.id);
             setUserName(user.fullName || user.login);
@@ -38,7 +35,6 @@ function App() {
             setIsAuthenticated(true);
             console.log('✅ Пользователь восстановлен из localStorage');
           } else {
-            // Данные повреждены - удаляем
             localStorage.removeItem('user');
           }
         } catch (e) {
@@ -53,63 +49,60 @@ function App() {
     initApp();
   }, []);
 
-const handleLogin = async (login: string, password: string) => {
+  const handleLogin = async (login: string, password: string) => {
     try {
-        // 1. Сначала получаем CSRF токен (на всякий случай ещё раз)
         await fetchCsrfToken();
-        
-        // 2. Выполняем вход
         const user = await apiLogin(login, password);
-        
-        // 3. Сохраняем данные пользователя
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // 4. Обновляем состояние
         setUserId(user.id);
         setUserName(user.fullName); 
         setUserRole(user.role);
         setIsAuthenticated(true);
-        
         console.log('✅ Вход выполнен успешно');
         
-        // 5. 🚀 РЕДИРЕКТ В ЗАВИСИМОСТИ ОТ РОЛИ
         if (user.role === 'admin') {
-            // Админ → админ-панель
             window.location.href = '/admin';
-            // или если используешь react-router:
-            // navigate('/admin');
         } else {
-            // Пользователь → дашборд
             window.location.href = '/dashboard';
-            // или: navigate('/dashboard');
         }
         
     } catch (error: any) {
         console.error('Ошибка входа:', error);
         alert(error.message || 'Неверный логин или пароль');
     }
-};
+  };
 
   const handleLogout = async () => {
     try {
-      // Пытаемся вызвать logout на сервере (опционально)
       const { logout } = await import('./services/api');
       await logout().catch(() => {});
     } catch (error) {
-      // Игнорируем ошибки при выходе
     } finally {
-      // Очищаем локальные данные
       localStorage.removeItem('user');
       setIsAuthenticated(false);
       setUserRole(null);
       setUserName('');
       setUserId(null);
-      
       console.log('✅ Выход выполнен');
     }
   };
 
-  // Показываем загрузку при инициализации
+  const handleBackFromWaybillFormAuto = () => {
+    window.location.href = '/dashboard';
+  };
+
+  // Проверяем путь для страницы накладной
+  const pathname = window.location.pathname;
+  
+  if (pathname === '/waybill-form-auto') {
+    return <WaybillFormAuto 
+      onBack={handleBackFromWaybillFormAuto} 
+      onLogout={handleLogout} 
+      userId={userId || 1} 
+      userName={userName} 
+    />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#E4E9F8] flex items-center justify-center">

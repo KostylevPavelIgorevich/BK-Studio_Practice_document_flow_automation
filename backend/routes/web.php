@@ -10,13 +10,6 @@ use App\Http\Controllers\WaybillController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
-// ========== УДАЛИТЕ ЭТОТ БЛОК - ОН НЕ НУЖЕН ==========
-// header('Access-Control-Allow-Origin: http://localhost:1420');
-// header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-// header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN');
-// header('Access-Control-Allow-Credentials: true');
-// ====================================================
-
 // ========== CSRF ТОКЕН ==========
 Route::get('/csrf-token', function() {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -43,16 +36,18 @@ Route::middleware(['web'])->group(function () {
     Route::resource('documents', DocumentController::class);
     Route::post('/documents/{id}/print', [DocumentController::class, 'printDocument']);
     Route::get('/document-types', [DocumentTypeController::class, 'index']);
+    Route::post('/document-types', [DocumentTypeController::class, 'store']); // ← ДОБАВЛЕН!
     Route::get('/document-types/{code}/fields', [DocumentTypeController::class, 'getFields']);
     Route::post('/waybill', [WaybillController::class, 'store']);
     Route::post('/waybill/{id}/save', [WaybillController::class, 'save']);
     Route::post('/waybill/{id}/print', [WaybillController::class, 'printWaybill']);
 });
 
-// ========== НОВЫЕ МАРШРУТЫ ДЛЯ АВТОМАТИЧЕСКИХ ШАБЛОНОВ ==========
+// ========== МАРШРУТЫ ДЛЯ АВТОМАТИЧЕСКИХ ШАБЛОНОВ ==========
 Route::get('/templates/applications', [TemplateController::class, 'getApplications']);
 Route::get('/templates/waybills', [TemplateController::class, 'getWaybills']);
 Route::get('/templates/scan', [TemplateController::class, 'scanTemplates']);
+Route::get('/templates/list', [TemplateController::class, 'getTemplatesList']);
 
 // ========== ДОПОЛНИТЕЛЬНЫЕ МАРШРУТЫ ==========
 Route::get('/applications', [DocumentController::class, 'index']);

@@ -14,9 +14,21 @@ class DocumentTypeController extends Controller
         return response()->json($types);
     }
 
+    public function store(Request $request)
+    {
+        $id = DB::table('document_types')->insertGetId([
+            'code' => $request->code,
+            'name' => $request->name,
+            'html_template' => $request->html_template,
+            'fields_config' => $request->fields_config,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        return response()->json(['id' => $id]);
+    }
+
     public function getFields($code)
     {
-        // Получаем тип документа из БД
         $documentType = DB::table('document_types')
             ->where('code', $code)
             ->first();
@@ -25,9 +37,7 @@ class DocumentTypeController extends Controller
             return response()->json([]);
         }
 
-        // fields_config уже хранится в JSON, просто декодируем и возвращаем
         $fields = json_decode($documentType->fields_config, true);
-
         return response()->json($fields ?? []);
     }
 }

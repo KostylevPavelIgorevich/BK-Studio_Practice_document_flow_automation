@@ -1,24 +1,11 @@
 <?php
-// CORS для разработки (обрабатываем preflight и добавляем заголовки)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Origin: http://localhost:1420');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Auth-Token, Authorization');
-    header('Access-Control-Allow-Credentials: true');
-    http_response_code(200);
-    exit();
-}
-
-header('Access-Control-Allow-Origin: http://localhost:1420');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Auth-Token, Authorization');
-header('Access-Control-Allow-Credentials: true');
+// router.php - полностью автоматический
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $publicDir = __DIR__ . '/public';
 $filePath = $publicDir . $uri;
 
-// Статические файлы (CSS, JS, изображения)
+// Статические файлы (CSS, JS, изображения, HTML)
 if ($uri !== '/' && is_file($filePath)) {
     $ext = pathinfo($filePath, PATHINFO_EXTENSION);
     $mime = [
@@ -38,14 +25,5 @@ if ($uri !== '/' && is_file($filePath)) {
     exit;
 }
 
-// API-маршруты (перенаправляем в Laravel)
-$api_prefixes = ['/api', '/login', '/logout', '/templates', '/documents', '/users', '/groups', '/csrf-token', '/temp', '/test', '/applications', '/waybill', '/document-types'];
-foreach ($api_prefixes as $prefix) {
-    if (strpos($uri, $prefix) === 0) {
-        require_once __DIR__ . '/public/index.php';
-        exit;
-    }
-}
-
-// Все остальные маршруты (React Router) – отдаём index.html
-readfile($publicDir . '/index.html');
+// ВСЕ остальные запросы – в Laravel
+require_once __DIR__ . '/public/index.php';

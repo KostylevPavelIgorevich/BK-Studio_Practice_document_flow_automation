@@ -286,4 +286,60 @@ class TemplateController extends Controller
         $cache[$key] = $key;
         return $key;
     }
+    // Добавьте этот метод в конец класса TemplateController
+
+    public function getTemplatesList()
+    {
+        $templatesPath = public_path('templates');
+        if (!is_dir($templatesPath)) {
+            return response()->json([]);
+        }
+
+        $files = glob($templatesPath . '/*.html');
+        $templates = [];
+
+        foreach ($files as $file) {
+            $filename = basename($file);
+            $html = file_get_contents($file);
+
+            // Извлекаем название из <title> или <h1>
+            $name = $this->extractTemplateName($html, $filename);
+
+            // Определяем тип документа (заявка или накладная)
+            $type = (strpos($filename, 'waybill') !== false || strpos($html, 'накладная') !== false)
+                ? 'waybill'
+                : 'application';
+
+            // Извлекаем поля из HTML
+            $fields = $this->extractFieldsWithAutoValidation($html);
+
+            // Проверяем, есть ли уже этот тип в БД
+            $existing = DB::table('document_types')->where('html_template', $filename)->first();
+
+            if (!$existing) {
+                // Автоматически создаём запись в БД
+                $id = DB::table('document_types')->insertGetId([
+                    'code' => $type . '_' . pathinfo($filename, PATHINFO_FILENAME),
+                    'name' => $name,
+                    'html_template' => $filename,
+                    'fields_config' => json_encode($fields),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                $id = $existing->id;
+            }
+
+            $templates[] = [
+                'id' => $id,
+                'filename' => $filename,
+                'name' => $name,
+                'type' => $type,
+                'fields' => $fields,
+                'html_content' => $html,
+            ];
+        }
+
+        return response()->json($templates);
+    }
 }

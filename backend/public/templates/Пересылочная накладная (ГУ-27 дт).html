@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+        <section class="gu-27_dt_class verticalPage newPage printArea pagePanel">
+    <div class="pPageBorder">
+        <div style="width: 19.5cm; margin: auto;">
+            <div class="header">
+                <br>
+                <div>
+                    <div>
+                        <div style="text-align: right;">
+                            <div><span style="font-weight: bold;">ГУ-27 дт &nbsp;&nbsp;</span></div>
+                        </div>
+                        <br>
+                        <div style="font-size: larger; font-weight: bold; text-transform: uppercase; text-align: center;">Пересылочная накладная</div>
+                        <div style="font-size: larger; text-align: right;"><span>{{ bill_number;Номер_накладной }}</span></div>
+                        <br>
+                    </div>
+                </div>
+            </div>
+            <!-- /.header -->
+            <div class="body">
+                <div style="text-align: justify;">
+                    На перевозку порожнего бункерного полувагона или порожней цистерны, из-под слива темных нефтепродуктов.
+                </div>
+                <br>
+                    <div>
+                        <div style="display: inline-block;">Перевозчик</div>
+                        <div style="width: 8cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ carrier_name;Наименование_перевозчика }}</span></div>
+                        <div style="width: 4cm; display: inline-block; border: 1px solid black;"><span>{{ carrier_code;Код_перевозчика }}</span></div>
+                    </div>
+                <br>
+                <div>
+                    <table style="width: 100%;">
+                        <tbody>
+                        <tr>
+                            <td style="width: 4cm; border: 1px solid black;">Номер цистерны(бункерного полувагона)</td>
+                            <td style="border: 1px solid black; text-align: center;">Тип калибровки цистерны</td>
+                            <td style="border: 1px solid black; text-align: center;">Количество осей</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;">{{ tank_number;Номер_цистерны }}</td>
+                            <td style="border: 1px solid black;">{{ calibration_type;Тип_калибровки }}</td>
+                            <td style="border: 1px solid black;">{{ axes_count;Количество_осей }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;" colspan="3">
+                                <div>
+                                    <div style="width: 50%; display: inline-block;">
+                                        Станция и инфраструктура отправления порожней цистерны(бункерного полувагона)
+                                    </div>
+                                    <div style="display: inline-block;"><span>{{ departure_station;Станция_отправления }}</span></div>
+                                </div>
+                                <br>
+                                <div>
+                                    <div style="width: 50%; display: inline-block;">
+                                        Отправитель (полное наименование организации, слившей или выгрузившей груз)
+                                    </div>
+                                    <div style="display: inline-block;"><span>{{ sender;Отправитель }}</span></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;" colspan="3">
+                                <div>
+                                    <div style="width: 50%; display: inline-block;">
+                                        Наименование и код груза, слитого из цистерны (бункерного полувагона)
+                                    </div>
+                                    <div style="display: inline-block;"><span>{{ previous_cargo;Слитый_груз }}</span></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid black;" colspan="3">
+                                <div>
+                                    <div>
+                                        Цистерна слита (бункерный полувагон выгружен) полностью, внутренняя и наружная поверхности котла (бункера) очищены от остатков груза, грязи (шлама) и льда
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4cm; border: 1px solid black; vertical-align: bottom;">
+                                <div style="font-size: smaller; text-align: center;">Печать или штемпель грузополучателя</div>
+                                <div>{{ receiver_stamp;Печать_получателя }}</div>
+                            </td>
+                            <td style="border: 1px solid black;" colspan="2">
+                                <div>Агент получателя груза</div>
+                                <div>
+                                    <div style="display: inline-block;">Должность</div>
+                                    <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ agent_position;Должность_агента }}</span></div>
+                                </div>
+                                <div>
+                                    <div style="display: inline-block;">Подпись</div>
+                                    <div style="width: 4cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ agent_signature;Подпись_агента }}</span></div>
+                                </div>
+                                <div>
+                                    <div style="width: 2cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ document_day;День }}</span></div>
+                                    <div style="display: inline-block;">число</div>
+                                    <div style="width: 2cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ document_month;Месяц }}</span></div>
+                                    <div style="display: inline-block;">мес</div>
+                                    <div style="width: 1cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ document_year;Год }}</span></div>
+                                    <div style="display: inline-block;">г.</div>
+                                </div>
+                                <div>&nbsp;</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4cm; border: 1px solid black; vertical-align: bottom;">
+                                <div style="font-size: smaller; text-align: center;">Календарный штемпель перевозчика на станции
+                                    отправления порожнего вагона
+                                </div>
+                            </td>
+                            <td style="border: 1px solid black;" colspan="2">
+                                <br>
+                                <table style="width: 100%">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 20%"></td>
+                                            <td style="border: 1px solid black; width: 30%">
+                                                {{ carrier_stamp;Штемпель_перевозчика }}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <br>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.body -->
+            <div class="footer noPageSplit">
+                <div>
+                    Пересылочная накладная заполняется на пишущей машинке, штемпелями или чернилами.
+                    Пересылочная накладная с подчистками, помарками, исправлениями, а также заполненная
+                    карандашом, не принимается.
+                </div>
+                <br>
+                <div>
+                    Грузоотправитель в соответствии с Уставом железнодорожного транспорта Российской Федерации несет
+                    ответственность за все последствия неправильности, неточности или неполноты сведений,
+                    указанных им  в пересылочной накладной
+                </div>
+                <br>
+                <div>
+                    <br>
+                    <div style="text-align: center; text-transform: uppercase;"><b>Корешок пересылочной накладной</b></div>
+                    <br>
+                    <div style="font-size: larger;"><span>{{ bill_number;Номер_накладной }}</span></div>
+                    <br>
+                    <div style="text-align: justify;">
+                        На перевозку порожнего бункерного полувагона или порожней цистерны, из-под слива темных нефтепродуктов.
+                    </div>
+                    <br>
+                    <div>
+                        <div>
+                            <div>
+                                <div style="display: inline-block; vertical-align: top;">Цистерна № (бункерный полувагон)</div>
+                                <div style="width: 3cm; display: inline-block; border-bottom: 1px solid black; vertical-align: top;"><span>{{ tank_number;Номер_цистерны }}</span></div>
+                                <div style="display: inline-block; vertical-align: top;">из-под</div>
+                                <div style="width: 8cm; display: inline-block; vertical-align: top;">
+                                    <div style="border-bottom: 1px solid black;"><span>{{ previous_cargo;Слитый_груз }}</span></div>
+                                    <div style="text-align: center; font-size: smaller;">(указать наименование и код слитого темного нефтепродукта)</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: inline-block; vertical-align: top;">слитого</div>
+                                <div style="width: 17.6cm; display: inline-block;">
+                                    <div style="border-bottom: 1px solid black;"><span>{{ sender;Отправитель }}</span></div>
+                                    <div style="text-align: center; font-size: smaller;">(полное наименование организации, слившей или выгрузившей груз)</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: inline-block; vertical-align: top;">Дата заполнения<br>пересылочной накладной</div>
+                                <div style="width: 14.3cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ fill_date;Дата_заполнения }}</span></div>
+                            </div>
+                            <br>
+                            <div>
+                                <div style="display: inline-block; vertical-align: top;">Получатель груза</div>
+                                <div style="width: 8cm; display: inline-block; vertical-align: top;">
+                                    <div style=" border-bottom: 1px solid black;"><span>{{ agent_info;Агент_получателя }}</span></div>
+                                    <div style="text-align: center; font-size: smaller;">
+                                        (должность и подпись разборчиво)
+                                    </div>
+                                </div>
+                                <div style="width: 2cm; display: inline-block;"><span>&nbsp;</span></div>
+                                <div style="width: 3cm; display: inline-block;vertical-align: top; text-align: center;">
+                                    <div style="border: 1px solid black;">{{ receiver_stamp;Штемпель_получателя }}</div>
+                                    <div>штемпель</div><div>получателя</div><div>груза</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.footer -->
+        </div>
+        <!-- /.print-area -->
+    </div>
+</section>
+	</body>
+</html>
