@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+        <section class="gu-38_v_class newPage printArea pagePanel">
+    <div class="landPrint">
+        <div style="width: 28.7cm; margin: auto;">
+            <div style="margin-top:5mm;">
+                <div class="header" style="width: 100%;">
+                    <div style="display: inline-block; width: 50%; vertical-align: top;">
+                        <!--<div style="margin-top: 0;"><span class="_SpecialSigns">Место для отметок</span></div>-->
+                        <div style="margin-top: 0;"><span>Место для отметок</span></div>
+                        <div><span class="_SpecialSignsStamp">Место для отметок</span></div>
+                    </div><!--
+                     --><div style="display: inline-block; width: 50%; text-align: right;">
+                    <div>
+                        Форма <span>ГУ - 38в ВЦ</span> <span class="border-div" style="padding-right: 10px; padding-left: 10px;">0363818</span>
+                    </div>
+                    <div>Утверждена ОАО 'РЖД' в 2004г.</div>
+                    <div><br><br></div>
+                    <!-- <div style="width: 100%;"><div style="margin-left: auto; margin-right: 15px; ; width:5cm ; height: 1cm;; background-color: rgba(0,0,0,0.1);">Штрих код</div></div>
+                    <div style="margin-right: 1.5cm;">00072c833533
+                    </div> -->
+                </div>
+                </div>
+                <!-- /.header -->
+                <div class="header2">
+                    <div style="width: 100%;">
+                        <div style="display: inline-block; width: 50%; vertical-align: top;">
+                            <div style="margin-top: 0;"><span>ВАГОННЫЙ ЛИСТ</span> на <span>контейнерные отправки</span></div>
+                            <div>ВАГОН № <span class="_WagonNumberCont_38V">{{ wagon_number;Номер_вагона }}</span></div>
+                        </div><!--
+                         --><div style="display: inline-block; width: 50%; text-align: right;">
+                        <div>
+                            <table class="border-table" cellspacing="0" cellpadding="0" style="width: 100%; text-align: center;">
+                                <tbody>
+                                <tr>
+                                    <td class="border-cell" colspan="2">Сведения о вагоне</td>
+                                </tr>
+                                <tr>
+                                    <td class="border-cell" style="width: 50%;">Грузоподъемность, т</td>
+                                    <td class="border-cell" style="width: 50%;">Кол-во осей</td>
+                                </tr>
+                                <tr>
+                                    <td class="border-cell" style="width: 40%;"><span class="_WagonGP_38A">{{ load_capacity;Грузоподъемность }}</span></td>
+                                    <td class="border-cell" style="width: 20%;"><span class="_WagonAxes_38A">{{ axes_count;Количество_осей }}</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </div>
+                    <div>Станция погрузки (формирования) <span class="_SendStation_38A" style="text-transform: uppercase">{{ loading_station;Станция_погрузки }}</span> <span class="_sendDate_38A">{{ loading_date;Дата_погрузки }}</span></div>
+                    <div>Станция выгрузки (сортировки) <span class="_ReceiveStation_38B" style="text-transform: uppercase">{{ unloading_station;Станция_выгрузки }}</span><span class="_receiveNotPublic_38B"></span></div>
+                    <!--<div>Для подачи вагонов на подъездной путь <span>&nbsp;</span></div>-->
+                </div>
+                <!-- /.header2 -->
+                <div class="body">
+                    <div style="width: 100%">
+                        <table class="border-table__top" cellspacing="0" cellpadding="0" style="width: 100%; text-align: center;">
+                            <tbody>
+                            <tr>
+                                <td class="border-cell" colspan="12">КОДЫ ДЛЯ НАТУРНОГО ЛИСТА</td>
+                            </tr>
+                            <tr>
+                                <td class="border-cell" rowspan="2">Масса груза в тоннах</td>
+                                <td class="border-cell" rowspan="2">Станция назначения вагона - сетевая разметка</td>
+                                <td class="border-cell" rowspan="2">Код груза</td>
+                                <td class="border-cell" rowspan="2">Код получателя</td>
+                                <td class="border-cell" colspan="4">Особые отметки</td>
+                                <td class="border-cell" rowspan="2">Кол-во контейнеров (груж/пор)</td>
+                                <td class="border-cell" rowspan="2">Выходная пограничная станция - сетевая разметка</td>
+                                <td class="border-cell" rowspan="2">Тара вагона</td>
+                                <td class="border-cell" rowspan="2">Примечание</td>
+                            </tr>
+                            <tr>
+                                <td class="border-cell">Маршрут, Нераб. парк</td>
+                                <td class="border-cell">Код прикрытия</td>
+                                <td class="border-cell">Негабарит., Живн., ДБ., НГ.</td>
+                                <td class="border-cell">Кол-во ЗПУ (пломб)</td>
+                            </tr>
+                            <tr>
+                                <td class="border-cell"><span class="_CargoWholeMassTons_38V">{{ cargo_weight;Масса_груза }}</span></td>
+                                <td class="border-cell"><span class="_ReceiveStationNetMark_38A">{{ destination_station_code;Код_станции_назначения }}</span></td>
+                                <td class="border-cell">00300</td>
+                                <td class="border-cell"><span class="_CargoReceiverTGNL_38A">{{ receiver_code;Код_получателя }}</span></td>
+                                <td class="border-cell"><span class="_RouteBlockedPark">{{ route_notes;Маршрутные_отметки }}</span></td>
+                                <td class="border-cell"><span class="_BlockingCode">{{ blocking_code;Код_прикрытия }}</span></td>
+                                <td class="border-cell"><span class="_SpecialCategoryAttribute">{{ special_marks;Особые_отметки }}</span></td>
+                                <td class="border-cell"><span class="_WholeZpuCountCont_38V">{{ seals_count;Количество_пломб }}</span></td>
+                                <td class="border-cell"><span class="_ContainerEmptyOrNot_38V">{{ containers_count;Количество_контейнеров }}</span></td>
+                                <td class="border-cell"></td>
+                                <td class="border-cell"><span class="_TareWeightBeam_38A">{{ wagon_tare;Тара_вагона }}</span></td>
+                                <td class="border-cell"><span class="_NaturePageAddText">{{ notes;Примечание }}</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table class="border-table__bottom" cellspacing="0" cellpadding="0" style="width: 100%; text-align: center;">
+                            <thead>
+                            <tr>
+                                <td class="border-cell">№<br>п/п</td>
+                                <td class="border-cell">№ контейнера</td>
+                                <td class="border-cell">Типо-<br>размер</td>
+                                <td class="border-cell">Номер отправки</td>
+                                <td class="border-cell">Станция и дорога отправления контейнера</td>
+                                <td class="border-cell">Станция и дорога назначения контейнера</td>
+                                <td class="border-cell">Масса брутто груженого контейнера, в кг</td>
+                                <td class="border-cell">Масса тары контейнера в кг</td>
+                                <td class="border-cell">Получатель<br>Наименование</td>
+                                <td class="border-cell">Примечание</td>
+                            </tr>
+                            </thead>
+                            <tbody class="_ContTableInsert_38V">
+                                <tr>
+                                    <td class="border-cell">{{ line_number;Номер_позиции }}</td>
+                                    <td class="border-cell">{{ container_number;Номер_контейнера }}</td>
+                                    <td class="border-cell">{{ container_type;Типоразмер }}</td>
+                                    <td class="border-cell">{{ shipment_number;Номер_отправки }}</td>
+                                    <td class="border-cell">{{ departure_station;Станция_отправления }}</td>
+                                    <td class="border-cell">{{ destination_station;Станция_назначения }}</td>
+                                    <td class="border-cell">{{ gross_weight;Масса_брутто }}</td>
+                                    <td class="border-cell">{{ tare_weight;Масса_тары }}</td>
+                                    <td class="border-cell">{{ receiver_name;Получатель }}</td>
+                                    <td class="border-cell">{{ container_notes;Примечание }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="border-cell" colspan="6">Итого: </td>
+                                    <td class="border-cell"><span class="_WholeContBruttoMass_38V">{{ total_gross_weight;Общая_масса_брутто }}</span></td>
+                                    <td class="border-cell"><span class="_WholeContTareMass_38V">{{ total_tare_weight;Общая_масса_тары }}</span></td>
+                                    <td class="border-cell" colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.body -->
+                <div><br></div>
+                <div class="footer">
+                    <div class="left" style="display: inline-block; width:50%">
+                        <div style="width: 100%;">
+                            <div style="display: inline-block;"><span>Вагон подан под погрузку</span></div>
+                            <div style="display: inline-block; vertical-align: top;"><b><span class="_CargoInTake_38A">{{ wagon_for_loading;Вагон_подан_под_погрузку }}</span></b></div>
+                        </div>
+                        <div style="width: 100%;">
+                            <div style="display: inline-block;"><span><b>Погружен</b></span></div>
+                            <div style="display: inline-block; vertical-align: top;"><b><span class="_CargoGotInTake_38A">{{ loaded;Погружен }}</span></b></div>
+                        </div>
+                        <div style="width: 100%;">
+                            <div style="display: inline-block; width:3.5cm;"><span>Приемосдатчик</span></div>
+                            <div style="display: inline-block; vertical-align: top;"><span class="_CargoReceiveSender">{{ loading_forwarder;Приемосдатчик_погрузки }}</span></div>
+                        </div>
+                    </div><!-- /.left
+                        --><div class="right" style="display: inline-block; width:50%">
+                    <div style="width: 100%;">
+                        <div style="display: inline-block;"><span>Вагон подан под выгрузку</span></div>
+                        <div style="display: inline-block; vertical-align: top;"><span class="_CargoOutTake_38A">{{ wagon_for_unloading;Вагон_подан_под_выгрузку }}</span></div>
+                    </div>
+                    <div style="width: 100%;">
+                        <div style="display: inline-block;"><span><b>Выгружен (рассортирован)</b></span></div>
+                        <div style="display: inline-block; vertical-align: top;"><b><span  class="_CargoGotOutTake_38A">{{ unloaded;Выгружен }}</span></b></div>
+                    </div>
+                    <div style="width: 100%;">
+                        <div style="display: inline-block; width:3.5cm;"><span>Приемосдатчик</span></div>
+                        <div style="display: inline-block; vertical-align: top;"><span class="_ReceiveSenderReceiverStation">{{ unloading_forwarder;Приемосдатчик_выгрузки }}</span></div>
+                    </div>
+                </div>
+                    <!-- /.right -->
+                    <div><br></div>
+                </div>
+                <!-- /.footer -->
+                <div class="border-div" style="width: 21cm; margin: auto;">
+                    <div style="text-align: center;"><b>Контейнеры погружены и закреплены правильно</b></div>
+                    <div><br></div>
+                    <div style="width: 100%;">
+                        <div style="display:inline-block; width: 3cm;">Должность</div>
+                        <div style="display:inline-block; width: 4cm;"><span>Приемосдатчик</span></div>
+                        <div style="display:inline-block; width: 2.5cm;">Ф.И.О.</div>
+                        <div style="display:inline-block; width: 4cm;"><span class="_CargoReceiveSender">{{ forwarder_name;ФИО_приемосдатчика }}</span></div>
+                        <div style="display:inline-block; width: 1.8cm;">Подпись</div>
+                        <div style="display:inline-block; border-bottom: 2px solid black; width: 4cm;margin-bottom: 4px;">{{ signature;Подпись }}</div>
+                    </div>
+                </div>
+                <!-- /.footer-table -->
+            </div>
+        </div>
+    </div>
+</section>
+
+	</body>
+</html>

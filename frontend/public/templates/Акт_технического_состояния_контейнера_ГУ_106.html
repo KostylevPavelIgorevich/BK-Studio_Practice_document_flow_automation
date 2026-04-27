@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+        <section class="gu-106_class verticalPage newPage printArea pagePanel">
+    <div class="pPageBorder">
+        <div style="width: 19.5cm; margin: auto;">
+            <div class="header">
+                <div style="width: 100%;">
+                    <div style="width: 85%; display: inline-block;"></div><!--
+                 --><div style="display: inline-block;">Форма ГУ-106</div>
+                </div>
+                <div style="text-transform: uppercase; text-align: center;" class="_containers">
+                    <h4>Акт о техническом состоянии контейнера № <div style="display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ act_number;Номер_акта }}</div></h4>
+                </div>
+            </div>
+            <!-- /.header -->
+            <div class="body">
+                <div>Составлен <div style="font-weight: bold; display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ act_date;Дата_составления }}</div></div>
+                <div>Станция <div style="font-weight: bold; display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ station;Станция }}</div></div>
+                <div class="_containers">
+                    Настоящий акт составлен в том, что перевозчиком при осмотре КОНТЕЙНЕРА №
+                    <div style="font-weight: bold; display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ container_number;Номер_контейнера }}</div>
+                    установлено:
+                </div>
+                <div class="_containers">
+                    Контейнер грузоподъемностью
+                    <div style="font-weight: bold; display: inline-block; width: .7cm; border-bottom: 1px solid black;" >{{ load_capacity;Грузоподъемность }}</div>
+                    т.
+                </div>
+                <div class="_containers">
+                    Тип контейнера <div style="font-weight: bold; display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ container_type;Тип_контейнера }}</div>
+                    построен <div style="font-weight: bold; display: inline-block; width: 2cm; border-bottom: 1px solid black;">{{ manufacture_date;Дата_постройки }}</div> на заводе
+                    <div style="font-weight: bold; display: inline-block; width: 4cm; border-bottom: 1px solid black;" >{{ manufacture_place;Место_постройки }}</div>
+                </div>
+                <div class="_containers">Время и место производства ремонта КОНТЕЙНЕРА:</div>
+                <br>
+                <div>
+                    <div style="width: 10cm;">
+                        <div style="font-weight: bold; border-bottom: 1px solid black;">{{ capital_repair;Капитальный_ремонт }}</div>
+                        <div style="font-size: smaller; position: relative; top: -3px; text-align: center;">капитального</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="width: 10cm;">
+                        <div style="font-weight: bold; border-bottom: 1px solid black;">{{ depot_repair;Деповский_ремонт }}</div>
+                        <div style="font-size: smaller; position: relative; top: -3px; text-align: center;">деповского</div>
+                    </div>
+                </div>
+                <div style="width: 10cm;">
+                    <div>
+                        <div style="font-weight: bold; border-bottom: 1px solid black;">{{ current_repair;Текущий_ремонт }}</div>
+                        <div style="font-size: smaller; position: relative; top: -3px; text-align: center;">текущего</div>
+                    </div>
+                </div>
+                <br>
+                <div>Выявлена неисправность <div style="font-weight: bold; display: inline-block; width: 4cm; border-bottom: 1px solid black;">{{ malfunction;Неисправность }}</div></div>
+                <div>Причина неисправности <div style="font-weight: bold; display: inline-block; width: 4cm; border-bottom: 1px solid black;">{{ malfunction_reason;Причина_неисправности }}</div></div>
+                <div>
+                    Заключение о возможности утраты, порчи груза вследствие наличия указанной выше неисправности
+                </div>
+                <div style="font-weight: bold; width: 100%; border-bottom: 1px solid black;">{{ cargo_conclusion_1;Заключение_о_грузе }}</div>
+                <div style="font-weight: bold; width: 100%; border-bottom: 1px solid black;">{{ cargo_conclusion_2;Заключение_о_грузе }}</div>
+                <div style="font-weight: bold; width: 100%; border-bottom: 1px solid black;">{{ cargo_conclusion_3;Заключение_о_грузе }}</div>
+                <div style="font-weight: bold; width: 100%; border-bottom: 1px solid black;">{{ cargo_conclusion_4;Заключение_о_грузе }}</div>
+                <br>
+            </div>
+            <!-- /.body -->
+            <div class="footer noPageSplit">
+                <div>Подписи:</div>
+                <div style="width: 100%; font-weight: bold;">
+                    <div style="width: 5.7cm; display: inline-block;"><span class="_gu_106_actWho1postMade">{{ position_1;Должность }}</span></div><!--
+                 --><div style="width: 6cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ signature_1;Подпись }}</span></div><!--
+                 --><div style="display: inline-block;"><span class="_gu_106_actWho1Made">{{ name_1;ФИО }}</span></div>
+                </div>
+                <div style="width: 100%; font-weight: bold;">
+                    <div style="width: 5.7cm; display: inline-block;"><span class="_gu_106_actWho2postMade">{{ position_2;Должность }}</span></div><!--
+                 --><div style="width: 6cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ signature_2;Подпись }}</span></div><!--
+                 --><div style="display: inline-block;"><span class="_gu_106_actWho2Made">{{ name_2;ФИО }}</span></div>
+                </div>
+                <div style="width: 100%; font-weight: bold;">
+                    <div style="width: 5.7cm; display: inline-block;"><span class="_gu_106_actWho3postMade">{{ position_3;Должность }}</span></div><!--
+                 --><div style="width: 6cm; display: inline-block; border-bottom: 1px solid black;"><span>{{ signature_3;Подпись }}</span></div><!--
+                 --><div style="display: inline-block;"><span class="_gu_106_actWho3Made">{{ name_3;ФИО }}</span></div>
+                </div>
+            </div>
+            <!-- /.footer -->
+        </div>
+        <!-- /.print-area -->
+    </div>
+</section>
+
+	</body>
+</html>

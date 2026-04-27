@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+        <section class="gu-23_vc_class verticalPage newPage printArea pagePanel">
+    <div class="pPageBorder">
+        <div style="width: 19.5cm; margin: auto;">
+            <div class="header">
+                <div style="width: 100%; text-align: right;">
+                    <div style="display: inline-block;">
+                        <div><span style="font-weight: bold;">Форма ГУ-23 ВЦ &nbsp;&nbsp;</span><span style="border: 2px solid black;">&nbsp;&nbsp;0363828&nbsp;&nbsp;</span></div>
+                        <div>Утверждена ОАО "РЖД" в 2004 г.</div>
+                    </div>
+                </div>
+                <div><br><br></div>
+                <div style="width: 100%; text-align: center; text-transform: uppercase;">
+                    <h4>Акт общей формы № <div style="display: inline-block; width: 4cm; border-bottom: 1px solid black;" class="_gu_23_vc_actNumber">{{ act_number;Номер_акта }}</div></h4>
+                </div>
+                <div style="width: 100%;">
+                    <div style="width: 65%; display: inline-block; vertical-align: top;">Станция, код <b><div style="width: 4cm;display: inline-block; border-bottom: 1px solid black;" class="_gu_23_vc_actSendStation">{{ station_code;Станция_и_код }}</div></b></div><!--
+                 --><div style="width: 35%; display: inline-block; vertical-align: top; border-bottom: 1px solid black;"><b><span class="_gu_23_vc_actDate">{{ act_date;Дата_акта }}</span></b></div>
+                </div>
+                <br>
+                <div style="width: 100%;">
+                    <div style="width: 65%; display: inline-block; vertical-align: top;">
+                        <div style="display: inline-block;">
+                            Поезд №
+                            <div style="width: 2cm; text-align: center; display: inline-block; border-bottom: 1px solid black;"><span class="_gu_23_vc_TrainWagonNumber">{{ train_number;Номер_поезда }}</span></div>
+                            индекс
+                            <div style="width: 2cm; text-align: center; display: inline-block; border-bottom: 1px solid black;"><span class="_gu_23_vc_TrainIndexWagonNumber">{{ train_index;Индекс_поезда }}</span></div>
+                        </div>
+                    </div><!--
+                 --><div style="width: 35%; display: inline-block; vertical-align: top;">
+                    <span>на перегоне</span>
+                    <div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ section_name;Название_перегона }}</div>
+                </div>
+                </div>
+                <br>
+                <div>Настоящий акт составлен в присутствии следующих лиц:</div>
+                <div style="width: 100%; border-bottom: 1px solid black;">
+                    <div style="width:65%; display: inline-block;"><b><span class="_gu_23_vc_actWho1postMade">{{ person1_position;Должность_1 }}</span></b></div><!--
+                 --><div style="width:35%; display: inline-block;"><b><span class="_gu_23_vc_actWho1Made">{{ person1_name;ФИО_1 }}</span></b></div>
+                </div>
+                <div style="width: 100%; border-bottom: 1px solid black;">
+                    <div style="width:65%; display: inline-block;"><b><span class="_gu_23_vc_actWho2postMade">{{ person2_position;Должность_2 }}</span></b></div><!--
+                 --><div style="width:35%; display: inline-block;"><b><span class="_gu_23_vc_actWho2Made">{{ person2_name;ФИО_2 }}</span></b></div>
+                </div>
+                <div style="width: 100%; border-bottom: 1px solid black;">
+                    <div style="width:65%; display: inline-block;"><b><span class="_gu_23_vc_actWho3postMade">{{ person3_position;Должность_3 }}</span></b></div><!--
+                 --><div style="width:35%; display: inline-block;"><b><span class="_gu_23_vc_actWho3Made">{{ person3_name;ФИО_3 }}</span></b></div>
+                </div>
+                <br>
+            </div>
+            <!-- /.header -->
+            <div class="body">
+                <div>Перевозчик <b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ carrier;Перевозчик }}</div></b></div>
+                <div>Станция отправления&nbsp;<b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ departure_station;Станция_отправления }}</div></b></div>
+                <div>Станция назначения&nbsp;<b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ destination_station;Станция_назначения }}</div></b></div>
+                <div>Отправка № <b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ shipment_number;Номер_отправки }}</div></b></div>
+                <div>Дата приема груза к перевозке <b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ acceptance_date;Дата_приема }}</div></b></div>
+                <div>Вагон, контейнер № <b><div style="display: inline-block; width: 4cm;  border-bottom: 1px solid black;">{{ wagon_container_number;Номер_вагона_контейнера }}</div></b></div>
+                <div>Наименование груза:</div>
+                <div style="border-bottom: 1px solid black;">{{ cargo_name;Наименование_груза }}</div>
+                <div style="border-bottom: 1px solid black;">{{ cargo_name_continuation;Наименование_груза_продолжение }}</div>
+                <br>
+                <div>Описание обстоятельств, вызвавших составление акта:</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line1;Обстоятельства_строка1 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line2;Обстоятельства_строка2 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line3;Обстоятельства_строка3 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line4;Обстоятельства_строка4 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line5;Обстоятельства_строка5 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ circumstances_line6;Обстоятельства_строка6 }}</div>
+                <br>
+                <div>Перечень наложенных ЗПУ:</div>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <td style="border: 1px solid black;">Тип ЗПУ</td>
+                                <td style="border: 1px solid black;">Номер ЗПУ</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid black;">{{ seal_type1;Тип_ЗПУ_1 }}</td>
+                                <td style="border: 1px solid black;">{{ seal_number1;Номер_ЗПУ_1 }}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black;">{{ seal_type2;Тип_ЗПУ_2 }}</td>
+                                <td style="border: 1px solid black;">{{ seal_number2;Номер_ЗПУ_2 }}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black;">{{ seal_type3;Тип_ЗПУ_3 }}</td>
+                                <td style="border: 1px solid black;">{{ seal_number3;Номер_ЗПУ_3 }}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black;">{{ seal_type4;Тип_ЗПУ_4 }}</td>
+                                <td style="border: 1px solid black;">{{ seal_number4;Номер_ЗПУ_4 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.body -->
+            <div class="footer noPageSplit">
+                <div style="width: 100%;">
+                    <div style="display: inline-block;"><span>Отправитель&nbsp;</span></div><!--
+                 --><div style="display: inline-block;"><b><div style="display: inline-block; width: 10cm; border-bottom: 1px solid black;">{{ sender;Отправитель }}</div></b></div>
+                </div>
+                <div style="width: 100%;">
+                    <div style="display: inline-block;"><span>Получатель&nbsp;</span></div><!--
+                 --><div style="display: inline-block;"><b><div style="display: inline-block; width: 10cm; border-bottom: 1px solid black;">{{ receiver;Получатель }}</div></b></div>
+                </div>
+                <br>
+                <div>Подписи:</div>
+                <div style="border-bottom: 1px solid black;">{{ signature1;Подпись_1 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ signature2;Подпись_2 }}</div>
+                <div style="border-bottom: 1px solid black;">{{ signature3;Подпись_3 }}</div>
+            </div>
+            <!-- /.footer -->
+        </div>
+        <!-- /.print-area -->
+    </div>
+</section>
+	</body>
+</html>
