@@ -31,28 +31,7 @@ export function Navbar({ hideMinimize = false, userName, title }: NavbarProps) {
           </span>
         </div>
       </div>
-      <div className="flex gap-3">
-        {!hideMinimize && (
-          <button
-            onClick={handleMinimize}
-            className="w-8 h-8 bg-[#E4E9F8] rounded-lg flex items-center justify-center hover:bg-white transition-colors"
-          >
-            <img src={minimizeIcon} alt="Свернуть" className="w-4 h-4" />
-          </button>
-        )}
-        <button
-          onClick={handleMaximize}
-          className="w-8 h-8 bg-[#E4E9F8] rounded-lg flex items-center justify-center hover:bg-white transition-colors"
-        >
-          <img src={maximizeIcon} alt="Развернуть" className="w-4 h-4" />
-        </button>
-        <button
-          onClick={handleClose}
-          className="w-8 h-8 bg-[#E4E9F8] rounded-lg flex items-center justify-center hover:bg-white transition-colors"
-        >
-          <img src={closeIcon} alt="Закрыть" className="w-4 h-4" />
-        </button>
-      </div>
+     
     </nav>
   );
 }
