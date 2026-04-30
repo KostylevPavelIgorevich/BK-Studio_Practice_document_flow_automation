@@ -338,15 +338,15 @@ const handleAcceptCreateUser = async () => {
         {/* ПРАВАЯ ПАНЕЛЬ - Пользователи */}
         <div className="w-3/4 space-y-4">
           <div className="flex gap-3">
-            <button onClick={handleCreateUser} className="px-6 py-3 flex-1 bg-[#7C5CFC] hover:bg-[#6a48e8] text-white font-medium rounded-lg flex items-center justify-center gap-2">
+            <button onClick={handleCreateUser} className="px-6 py-2 flex-1 bg-[#7C5CFC] hover:bg-[#6a48e8] text-white font-medium rounded-lg flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
               Создать пользователя
             </button>
-            <button onClick={handleEditUser} className="px-6 py-3 flex-1 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg flex items-center justify-center gap-2">
+            <button onClick={handleEditUser} className="px-6 py-2 flex-1 bg-[#2860F0] hover:bg-[#1e4bc2] text-white font-medium rounded-lg flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               Редактирование пользователя
             </button>
-            <button onClick={onLogout} className="px-6 py-3 flex-1 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg flex items-center justify-center gap-2">
+            <button onClick={onLogout} className="px-6 py-2 flex-1 bg-[#E36756] hover:bg-[#d55a48] text-white font-medium rounded-lg flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
               Выход
             </button>
